@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import math
+
 
 # Class representing a 2-dimensional point (should switch to a list later)
 class Point:
@@ -26,6 +26,10 @@ class Point:
 def unit_vector(vector):
     """ Scales the vector to a unit vector """
     return vector / np.linalg.norm(vector)
+
+def dist(p1, p2):
+    """ Given 2 points, find the distance between them """
+    return np.linalg.norm(p2.vec - p1.vec)
 
 def angle(p1, p2, p3):
     """ Given 3 points, find the angle at p2 formed by the 3 points """
