@@ -4,19 +4,19 @@ This is the code repository hosting some of our works on local rational invarian
 
 ## Input Specification (Tentatively)
 
-The code takes in a text file of the following input specification:
-- The first line of the file should contain a number, indicating the number of points of the polygonal curve
+Currently, we will be processing polygonal curves in $\mathbb{R}^2$, the code takes in a text file of the following input specification:
+- The first line of the file should contain a number, indicating the dimension of the point (This is 2, it doesn't do anything yet)
 - For each point, they are represented as:
 ```
-<x-position of point> <y-position of point> <is x an integer> <is y an integer>
+<x-position of point> <is x an integer> <y-position of point> <is y an integer>
 ```
 An example file looks like:
 ```
-4
-0 0 1 1
-1.5 1 0 1
-2.5 2 0 1
-3 3.5 1 0
+2
+0 1 0 1
+1.5 0 1 1
+2.5 0 2 1
+3 1 3.5 0
 ```
 
 ## How to Run

@@ -2,26 +2,26 @@ import numpy as np
 import random
 import math
 
-# Class representing a 2-dimensional point (should switch to a list later)
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        # Probably how we are gonna roll with this:
-        self.vec = np.array([x, y])
+# Class representing an n-dimensional point
+class NPoint:
+    def __init__(self, point):
+        # Array of numbers representing the point
+        self.point = point
+        # Numpy Array
+        self.vec = np.array(self.point)
         # The String Representation of the value of the Literal
-        self.value = "(" + str(self.x) + ", " + str(self.y) + ")"
+        self.value = str(tuple(self.point))
 
     def __repr__(self):
-        return "(" + str(self.x) + ", " + str(self.y) + ")"
+        return str(tuple(self.point))
 
     def __eq__(self, other):
-        if type(other) != Point:
+        if type(other) != NPoint:
             return False
-        return self.x == other.x and self.y == other.y
-
+        return self.point == other.point
+    
     def __hash__(self):
-      return hash((self.x, self.y))
+      return hash(self.point)
 
 def unit_vector(vector):
     """ Scales the vector to a unit vector """

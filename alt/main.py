@@ -1,9 +1,7 @@
 #!/bin/python3
 import sys
 from copy import copy, deepcopy
-import random
-from point import Point
-import matplotlib.pyplot as plt
+from npoint import NPoint
 
 # Run program using 'python main.py [directory to file]'
 
@@ -14,27 +12,14 @@ def read_input(inputFile):
         dimension = int(f.readline())
         for line in f.readlines():
             tokens = line.strip().split()
-            x_bool = bool(int(tokens[1]))
-            y_bool = bool(int(tokens[3]))
-            x_pos =  int(tokens[0]) if x_bool else float(tokens[0])
-            y_pos =  int(tokens[2]) if y_bool else float(tokens[2])
-            new_point = Point(x_pos, y_pos)
+            
+            bool_point = map(lambda b: bool(int(b)), tokens[1::2])
+            new_point = map(lambda b, pt: int(pt) if b else float(pt), bool_point, tokens[0::2])
+            new_point = NPoint(list(new_point))
+            
             poly_points.append(new_point)
     
     return poly_points, dimension
-
-def visualize(points):
-    """ Given a list of points, draws the curve traced out by it """
-    input = map(lambda pt: [pt.x, pt.y], points)
-    x_pts, y_pts = zip(*input) #create lists of x and y values
-    
-    plt.figure()
-    plt.plot(x_pts, y_pts)
-    plt.show()
-
-def printOutput(result):
-    result = ""
-    print(result)
     
 # The main body of the code:
 if __name__ == "__main__":
@@ -44,4 +29,3 @@ if __name__ == "__main__":
     print("This is a curve in dimension: ", dimension)
     print("The list has length: ", len(poly_points))
     print("The list has points: ", poly_points)
-    visualize(poly_points)
