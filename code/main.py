@@ -1,11 +1,13 @@
 #!/bin/python3
 from re import X
-import sys, math, itertools
+import sys, itertools
 from copy import copy, deepcopy
 from weakref import ref
 from point import Point, dist
 import matplotlib.pyplot as plt
 from functools import reduce
+
+from util import int_between
 
 # Run program using 'python main.py [directory to file]'
 
@@ -27,15 +29,16 @@ def read_input(inputFile):
 
 def validate_input(points):
     """ Checks if the list of points matches the input specification """
-    return True
-
-# Given two numbers x, y, find the integers between them inclusive
-def int_between(x, y):
-    if x < y:
-        return range(math.ceil(x), math.floor(y) + 1)
-    else:
-        return range(math.ceil(y), math.floor(x) + 1)
+    # Avoid Non-degenerate lines
+    if len(points) < 2:
+        print("Error: Need At Least 2 points to indicate a polygonal curve")
+        sys.exit(0)
         
+    # Every point needs to have one coordinate to be an integer
+    for pt in points:
+        if not isinstance(pt.x, int) and not isinstance(pt.y, int):
+            print("Error: " + str(pt) + " does not have integer coordinate")
+            sys.exit(0)
 
 # This needs some work to generalize
 def index_segment(point_1, point_2):
@@ -69,6 +72,12 @@ def index_segment(point_1, point_2):
     result = sorted(result, key=lambda pt: dist(pt, point_1))
     
     return result
+
+def label(point):
+    """ Given a point on the integer grid, labels whether it's on the vertical or horizontal part """
+    is_on_x = (point.x - int(point.x) == 0)
+    is_on_y = (point.y - int(point.y) == 0)
+    return is_on_x, is_on_y
     
 def solve(points):
     """ Given a polygonal curve, constructs its grid approximation """
@@ -77,7 +86,7 @@ def solve(points):
     for idx, point in enumerate(points):
         if idx != len(points) - 1:
             adj_list.append([point, points[idx + 1]])
-    
+    adj_list.insert(0, [])
     refined_points = reduce(lambda prev, next: prev + index_segment(next[0], next[1]), adj_list)
     refined_points = [k for k, g in itertools.groupby(refined_points)]
     visualize(refined_points, "Refined Input")
@@ -94,7 +103,11 @@ def visualize(points, title):
     fig = plt.figure()
     plt.plot(x_pts, y_pts)
     for i in range(0, len(x_pts)):
-        plt.plot(x_pts[i], y_pts[i], 'r-o')
+        is_on_x, is_on_y = label(points[i])
+        color = 'r-o' if is_on_x else 'b-o'
+        if is_on_x and is_on_y:
+            color = 'g-o'
+        plt.plot(x_pts[i], y_pts[i], color)
     # Integer Grid
     ax = fig.gca()
     xmin, xmax = ax.get_xlim() 
@@ -107,20 +120,13 @@ def visualize(points, title):
 
     plt.show()
 
-def printOutput(result):
-    result = ""
-    print(result)
-    
 # The main body of the code:
 if __name__ == "__main__":
     input_file = sys.argv[1]
-    # print(index_segment(Point(0, 0), Point(3, 3)))
+    print(index_segment(Point(0, 0), Point(1.5, 1)))
     points, dimension = read_input(input_file)
+    validate_input(points)
     
-    if len(points) < 2:
-        print("Error: Need At Least 2 points to indicate a polygonal curve")
-        sys.exit(0)
-        
     # If the curve is not closed, close it
     if points[0] != points[-1]:
         points.append(points[0])
@@ -130,9 +136,4 @@ if __name__ == "__main__":
     print("The list has points: ", points)
     
     visualize(points, "Raw Input")
-    
-    if validate_input(points):
-        solve(points)
-    else:
-        print("Error: Input is not valid")
-        sys.exit(0)
+    solve(points)
