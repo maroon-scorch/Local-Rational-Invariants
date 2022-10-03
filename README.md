@@ -20,6 +20,11 @@ An example file looks like:
 ```
 
 ## How to Run
+To run the code
 ```
 ./run.sh <path_to_file>
+```
+To run the test
+```
+pytest
 ```

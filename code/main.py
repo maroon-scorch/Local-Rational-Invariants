@@ -94,6 +94,7 @@ def solve(points):
     adj_list.insert(0, [])
     refined_points = reduce(lambda prev, next: prev + index_segment(next[0], next[1]), adj_list)
     refined_points = [k for k, g in itertools.groupby(refined_points)]
+    print(refined_points)
     visualize(refined_points, "Refined Input")
     
     # Step 2: For all the points on the curve that intersect with the grids, mark the point to be 0 if it meets
@@ -133,7 +134,7 @@ if __name__ == "__main__":
     validate_input(points)
     
     # Apply appropriate scaling?
-    points = scale_input(points, 2)
+    # points = scale_input(points, 2)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
