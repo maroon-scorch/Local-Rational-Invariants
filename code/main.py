@@ -39,6 +39,11 @@ def validate_input(points):
         if not isinstance(pt.x, int) and not isinstance(pt.y, int):
             print("Error: " + str(pt) + " does not have integer coordinate")
             sys.exit(0)
+            
+def scale_input(points, n):
+    """ Scales the points by a factor of n (integer) """
+    result = list(map(lambda pt: Point(n * pt.x, n * pt.y), points))
+    return result
 
 # This needs some work to generalize
 def index_segment(point_1, point_2):
@@ -126,6 +131,9 @@ if __name__ == "__main__":
     print(index_segment(Point(0, 0), Point(1.5, 1)))
     points, dimension = read_input(input_file)
     validate_input(points)
+    
+    # Apply appropriate scaling?
+    points = scale_input(points, 2)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
