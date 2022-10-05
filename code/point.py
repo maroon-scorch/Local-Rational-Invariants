@@ -22,6 +22,12 @@ class Point:
 
     def __hash__(self):
       return hash((self.x, self.y))
+  
+    def setCoordinate(self, new_x, new_y):
+        self.x = new_x
+        self.y = new_y
+        self.vec = np.array([new_x, new_y])
+        self.value = "(" + str(self.x) + ", " + str(self.y) + ")"
 
 def unit_vector(vector):
     """ Scales the vector to a unit vector """

@@ -3,11 +3,16 @@ from re import X
 import sys, itertools
 from copy import copy, deepcopy
 from weakref import ref
-from point import Point, dist
+from point import Point, dist, angle
 import matplotlib.pyplot as plt
 from functools import reduce
+import math
 
 from util import int_between
+
+min_range = 160/180*math.pi
+max_range = 200/180*math.pi
+epsilon = 0.1
 
 # Run program using 'python main.py [directory to file]'
 
@@ -28,10 +33,11 @@ def read_input(inputFile):
     return poly_points, dimension
 
 def validate_input(points):
-    """ Checks if the list of points matches the input specification """
+    """ Checks if the list of points matches the input specification
+    """
     # Avoid Non-degenerate lines
-    if len(points) < 2:
-        print("Error: Need At Least 2 points to indicate a polygonal curve")
+    if len(points) < 3:
+        print("Error: Need At Least 3 points to indicate a polygonal curve")
         sys.exit(0)
         
     # Every point needs to have one coordinate to be an integer
@@ -39,6 +45,21 @@ def validate_input(points):
         if not isinstance(pt.x, int) and not isinstance(pt.y, int):
             print("Error: " + str(pt) + " does not have integer coordinate")
             sys.exit(0)
+            
+    # Angle of any three consecutive points are 160-200 degree
+    ang_list = []
+    for idx, pt in enumerate(points):
+        if idx < len(points) - 2:
+            ang_list.append([pt, points[idx + 1], points[idx + 2]])
+    
+    ang_list.append([points[-2], points[-1], points[0]])
+    ang_list.append([points[-1], points[0], points[1]])
+    
+    for triple in ang_list:
+        ang = angle(triple[0], triple[1], triple[2])
+        if not (min_range <= ang and ang <= max_range):
+            print("Error: " + str(triple) + " has angle out of range - " + str(ang))
+            # sys.exit(0)
             
 def scale_input(points, n):
     """ Scales the points by a factor of n (integer) """
@@ -83,22 +104,85 @@ def label(point):
     is_on_x = (point.x - int(point.x) == 0)
     is_on_y = (point.y - int(point.y) == 0)
     return is_on_x, is_on_y
+
+def label_index(point):
+    is_on_x = (point.x - int(point.x) == 0)
+    is_on_y = (point.y - int(point.y) == 0)
     
-def solve(points):
-    """ Given a polygonal curve, constructs its grid approximation """
+    index = 0 if is_on_x else 1
+    return index
+    
+
+def avoid_grid(points):
+    result = []
+    for pt in points:
+        is_x_int = abs(int(pt.x) - pt.x) < 0.00001
+        is_y_int = abs(int(pt.y) - pt.y) < 0.00001
+        if is_x_int and is_y_int:
+            result.append(Point(pt.x + epsilon, pt.y))
+        else:
+            result.append(pt)
+    return result
+
+def refine_input(points):
     # Step 1: Start from one of the end point, index each line segment cut by the grid
     adj_list = []
     for idx, point in enumerate(points):
         if idx != len(points) - 1:
             adj_list.append([point, points[idx + 1]])
+    # FUTURE Mattie - might wanna double check this, did you add?
     adj_list.insert(0, [])
     refined_points = reduce(lambda prev, next: prev + index_segment(next[0], next[1]), adj_list)
     refined_points = [k for k, g in itertools.groupby(refined_points)]
-    print(refined_points)
-    visualize(refined_points, "Refined Input")
     
-    # Step 2: For all the points on the curve that intersect with the grids, mark the point to be 0 if it meets
+    # Avoid Grid Points by Perturbing it
+    refined_points = avoid_grid(refined_points)
+    return refined_points
+
+def local_smooth(points, current_index, labels):
+    if labels == [0, 1, 0]:
+        a = 1    
+    elif labels == [1, 0, 1]:
+        b = 1
+    
+def smooth(points):
+    print(points)
+    label_list = list(map(lambda p: label_index(p), points))
+    
+    triple_list = []
+    for idx, pt in enumerate(label_list):
+        if idx < len(points) - 2:
+            triple_list.append((points[idx + 1], [label_list[idx], label_list[idx + 1], label_list[idx + 2]]))
+    
+    triple_list.append((points[-1], [label_list[-2], label_list[-1], label_list[0]]))
+    triple_list.insert(0, (points[0], [label_list[-1], label_list[0], label_list[1]]))
+    
+    # print(label_list)
+    # print(triple_list)
+    
+    # result = scale_input(, 2)
+        
+
+def solve(points):
+    """ Given a polygonal curve, constructs its grid approximation """
+    # Step 2: For all the points on the curve that intersect with the grids, 
+    # mark the point to be 0 if it meets
     # the horizontal sides of the grid and 1 if it meets with the vertical sides.
+    grid_list = []
+    
+    label_dict = {}
+    for pt in points:
+        label_dict[pt] = label_index(pt)
+    
+    adj_list = []
+    for idx, point in enumerate(points):
+        if idx != len(points) - 1:
+            adj_list.append([point, points[idx + 1]])
+    adj_list.append([points[-1], points[0]])
+    
+    # for edge in adj_list:
+        
+    
 
 def visualize(points, title):
     """ Given a list of points and a title, draws the curve traced out by it """
@@ -129,7 +213,6 @@ def visualize(points, title):
 # The main body of the code:
 if __name__ == "__main__":
     input_file = sys.argv[1]
-    print(index_segment(Point(0, 0), Point(1.5, 1)))
     points, dimension = read_input(input_file)
     validate_input(points)
     
@@ -143,6 +226,11 @@ if __name__ == "__main__":
     print("This is a curve in dimension: ", dimension)
     print("The list has length: ", len(points))
     print("The list has points: ", points)
-    
     visualize(points, "Raw Input")
-    solve(points)
+    
+    # Refine the inputs first
+    refined_points = refine_input(points)
+    print(refined_points)
+    visualize(refined_points, "Refined Input")
+    # smooth(refined_points)
+    solve(refined_points)
