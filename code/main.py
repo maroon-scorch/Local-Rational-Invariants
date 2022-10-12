@@ -185,6 +185,14 @@ def smooth(points):
                 new_point = Point((points[idx-1].x + points[idx + 1].x)/2, points[idx-1].y)
                 points[idx] = new_point
                 return False
+        # ang = angle(points[idx - 1], points[idx], points[idx + 1]);
+        # if not (min_range <= ang and ang <= max_range):
+        #     print("Too sharp at index ", idx)
+        #     new_point = Point((points[idx-1].x + points[idx + 1].x)/2, (points[idx-1].y + points[idx + 1].y)/2)
+        #     points[idx] = new_point
+        #     points = scale_input(points, 2)
+        #     return False
+            
             
     print("No sharp points!")
     return True
@@ -193,25 +201,99 @@ def smooth(points):
     
     # result = scale_input(, 2)
         
+def closest_grid_point(point):
+    x_1 = math.floor(point.x)
+    x_2 = math.ceil(point.x)
+    y_1 = math.floor(point.y)
+    y_2 = math.ceil(point.y)
+    
+    p1 = Point(x_1, y_1)
+    p2 = Point(x_1, y_2)
+    p3 = Point(x_2, y_1)
+    p4 = Point(x_2, y_2)
+    
+    result = sorted([p1, p2, p3, p4], key=lambda pt: dist(pt, point))
+    return result[0]    
+    
 
 def solve(points):
     """ Given a polygonal curve, constructs its grid approximation """
-    # Step 2: For all the points on the curve that intersect with the grids, 
-    # mark the point to be 0 if it meets
-    # the horizontal sides of the grid and 1 if it meets with the vertical sides.
     grid_list = []
+    label_list = list(map(lambda p: label_index(p), points))
     
-    label_dict = {}
-    for pt in points:
-        label_dict[pt] = label_index(pt)
     
-    adj_list = []
     for idx, point in enumerate(points):
-        if idx != len(points) - 1:
-            adj_list.append([point, points[idx + 1]])
-    adj_list.append([points[-1], points[0]])
+        # Find the closest grid point to the first point
+        if idx == 0:
+            initial_point = closest_grid_point(point)
+            grid_list.append(initial_point)
+        else:
+            # Same Label, move straight?
+            if label_list[idx - 1] == label_list[idx]:
+                previous_point = grid_list[-1]
+                if label_list[idx] == 0:
+                    diff = point.y - previous_point.y
+                    diff = diff/abs(diff) 
+                    new_point = Point(previous_point.x, previous_point.y + diff)
+                    grid_list.append(new_point)
+                else:
+                    diff = point.x - previous_point.x
+                    diff = diff/abs(diff) 
+                    new_point = Point(previous_point.x + diff, previous_point.y)
+                    grid_list.append(new_point)
+            # Different label, move corner?
+            else:
+                previous_point = grid_list[-1]
+                diff_x = point.x - previous_point.x
+                diff_x = diff_x/abs(diff_x)
+                
+                diff_y = point.y - previous_point.y
+                diff_y = diff_y/abs(diff_y)
+                
+                new_point = Point(previous_point.x + diff_x, previous_point.y)
+                new_point_2 = Point(new_point.x, new_point.y + diff_y)
+                grid_list.append(new_point)
+                grid_list.append(new_point_2)
+                    
     
-    # for edge in adj_list:
+    # # Step 2: For all the points on the curve that intersect with the grids, 
+    # # mark the point to be 0 if it meets
+    # # the horizontal sides of the grid and 1 if it meets with the vertical sides.
+    # grid_list = []
+    
+    # label_dict = {}
+    # for pt in points:
+    #     label_dict[pt] = label_index(pt)
+    
+    # adj_list = []
+    # for idx, point in enumerate(points):
+    #     if idx != len(points) - 1:
+    #         adj_list.append([point, points[idx + 1]])
+    # adj_list.append([points[-1], points[0]])
+    
+    print(grid_list)
+    grid_list.append(Point(0, 1))
+    return grid_list
+
+def solve_alt(points):
+    """ Given a polygonal curve, constructs its grid approximation """
+    grid_list = []
+    label_list = list(map(lambda p: label_index(p), points))
+    
+    
+    for idx, point in enumerate(points):
+        # Find the closest grid point to the first point
+        if idx == 0:
+            grid_list.append(point)
+        else:
+            previous_point = grid_list[-1]
+            next_point_1 = Point(previous_point.x, point.y);
+            next_point_2 = Point(point.x, next_point_1.y);
+            grid_list.append(next_point_1)
+            grid_list.append(next_point_2)
+    
+    print(grid_list)
+    return grid_list
         
     
 
@@ -263,9 +345,17 @@ if __name__ == "__main__":
     refined_points = refine_input(points)
     print(refined_points)
     visualize(refined_points, "Refined Input")
-    while not smooth(refined_points) or has_grid_point(refined_points):
-        refined_points = avoid_grid(refined_points)
-        refined_points = refine_input(refined_points)
-        print("-------------")
-    visualize(refined_points, "Smoothed Out")
-    # solve(refined_points)
+    
+    # Hopefully this while loop terminates
+    # Someone prove this?
+    # while not smooth(refined_points) or has_grid_point(refined_points):
+    #     refined_points = refine_input(refined_points)
+    #     refined_points = avoid_grid(refined_points)
+    #     print("-------------")
+    # refined_points = refine_input(refined_points)
+    # visualize(refined_points, "Smooth and No Grid Points")
+    
+    solution = solve_alt(refined_points)
+    visualize(solution, "Grid Approximation")
+    # solution = solve(refined_points)
+    # visualize(refined_points + solution, "Grid Approximation")
