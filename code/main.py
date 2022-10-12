@@ -113,6 +113,15 @@ def label_index(point):
     return index
     
 
+def has_grid_point(points):
+    """ Checks if the points contain a point on the integer lattice """
+    for pt in points:
+        is_x_int = abs(int(pt.x) - pt.x) < 0.00001
+        is_y_int = abs(int(pt.y) - pt.y) < 0.00001
+        if is_x_int and is_y_int:
+            return True
+    return False
+
 def avoid_grid(points):
     result = []
     for pt in points:
@@ -135,9 +144,16 @@ def refine_input(points):
     refined_points = reduce(lambda prev, next: prev + index_segment(next[0], next[1]), adj_list)
     refined_points = [k for k, g in itertools.groupby(refined_points)]
     
-    # Avoid Grid Points by Perturbing it
-    refined_points = avoid_grid(refined_points)
     return refined_points
+
+def vert_to_edges(points):
+    """Given a sequence of vertices, convert them into a list"""
+    edges = []
+    for idx, point in enumerate(points):
+        if idx != len(points) - 1:
+            edges.append([point, points[idx + 1]])
+    edges.append([points[-1], points[0]]);
+    return edges;
 
 def local_smooth(points, current_index, labels):
     if labels == [0, 1, 0]:
@@ -146,17 +162,32 @@ def local_smooth(points, current_index, labels):
         b = 1
     
 def smooth(points):
-    print(points)
     label_list = list(map(lambda p: label_index(p), points))
     
     triple_list = []
     for idx, pt in enumerate(label_list):
         if idx < len(points) - 2:
-            triple_list.append((points[idx + 1], [label_list[idx], label_list[idx + 1], label_list[idx + 2]]))
+            triple_list.append((idx + 1, [label_list[idx], label_list[idx + 1], label_list[idx + 2]]))
     
-    triple_list.append((points[-1], [label_list[-2], label_list[-1], label_list[0]]))
-    triple_list.insert(0, (points[0], [label_list[-1], label_list[0], label_list[1]]))
+    triple_list.append((len(points) - 1, [label_list[-2], label_list[-1], label_list[0]]))
+    triple_list.insert(0, (0, [label_list[-1], label_list[0], label_list[1]]))
     
+    for idx, label in triple_list:
+        if label == [0, 1, 0]:
+            if points[idx - 1].x == points[idx + 1].x:
+                print("Too sharp at index ", idx)
+                new_point = Point(points[idx-1].x, (points[idx-1].y + points[idx + 1].y)/2)
+                points[idx] = new_point
+                return False  
+        if label == [1, 0, 1]:
+            if points[idx - 1].y == points[idx + 1].y:
+                print("Too sharp at index ", idx)
+                new_point = Point((points[idx-1].x + points[idx + 1].x)/2, points[idx-1].y)
+                points[idx] = new_point
+                return False
+            
+    print("No sharp points!")
+    return True
     # print(label_list)
     # print(triple_list)
     
@@ -217,7 +248,7 @@ if __name__ == "__main__":
     validate_input(points)
     
     # Apply appropriate scaling?
-    # points = scale_input(points, 2)
+    points = scale_input(points, 10)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
@@ -232,5 +263,9 @@ if __name__ == "__main__":
     refined_points = refine_input(points)
     print(refined_points)
     visualize(refined_points, "Refined Input")
-    # smooth(refined_points)
-    solve(refined_points)
+    while not smooth(refined_points) or has_grid_point(refined_points):
+        refined_points = avoid_grid(refined_points)
+        refined_points = refine_input(refined_points)
+        print("-------------")
+    visualize(refined_points, "Smoothed Out")
+    # solve(refined_points)

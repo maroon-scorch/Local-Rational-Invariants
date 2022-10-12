@@ -20,11 +20,16 @@ An example file looks like:
 ```
 
 ## How to Run
+To install dependencies
+```
+pip install -r requirements.txt
+```
 To run the code
 ```
 ./run.sh <path_to_file>
 ```
 To run the test
 ```
+cd tests
 pytest
 ```
