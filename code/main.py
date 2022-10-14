@@ -295,7 +295,7 @@ def solve_alt(points):
     print(grid_list)
     return grid_list
         
-    
+  
 
 def visualize(points, title):
     """ Given a list of points and a title, draws the curve traced out by it """

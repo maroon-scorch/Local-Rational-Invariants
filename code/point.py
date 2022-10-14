@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sp
 import random
 
 
@@ -44,6 +45,8 @@ def angle(p1, p2, p3):
     angle = np.arccos(np.clip(np.dot(vec1, vec2), -1.0, 1.0))
     
     return angle
-    
+
+def to_sp(pt):
+    return sp.Point(pt.x, pt.y)
     
     
