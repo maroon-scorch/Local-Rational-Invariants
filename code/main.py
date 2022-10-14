@@ -379,6 +379,50 @@ def is_stable(points, index):
     # print(point_1.vec)
     return approx_contains(intersection_1, point_1) and approx_contains(intersection_2, point_2) and approx_contains(intersection_3, point_3) and approx_contains(intersection_4, point_4)
 
+def is_left(start, end, point):
+    result = (end.x - start.x)*(point.y - start.y) - (end.y - start.y)*(point.x - start.x)
+    return result > 0
+
+def is_crossing_stable(seg_1, seg_2):
+    intersection = seg_1[1]
+    
+    e1_start = seg_1[0]
+    e1_end = seg_1[2]
+    
+    e2_start = seg_2[0]
+    e2_end = seg_2[2]
+    
+    if is_left(e1_start, intersection, e2_start) and is_left(intersection, e1_end, e2_start) and is_left(e1_start, intersection, e2_end) and is_left(intersection, e1_end, e2_end):
+        return False
+    if not (is_left(e1_start, intersection, e2_start) or is_left(intersection, e1_end, e2_start) or is_left(e1_start, intersection, e2_end) or is_left(intersection, e1_end, e2_end)):
+        return False
+    
+    if is_left(e2_start, intersection, e1_start) and is_left(intersection, e2_end, e1_start) and is_left(e2_start, intersection, e1_end) and is_left(intersection, e2_end, e1_end):
+        return False
+    if not (is_left(e2_start, intersection, e1_start) or is_left(intersection, e2_end, e1_start) or is_left(e2_start, intersection, e1_end) or is_left(intersection, e2_end, e1_end)):
+        return False
+    
+    return True
+    
+# garbage code
+def is_stable_alt(points, index):
+    intersection = points[index]
+    
+    indices = [i for i, x in enumerate(points) if x == intersection]
+    triple_list = []
+    for i in indices:
+        triple_list.append([points[i-1], intersection, points[i+1]])
+    
+    for seg_1, seg_2 in list(itertools.combinations(triple_list,2)):
+        # if at least one crossing is stable, the entire point is stable
+        print("dfaf")
+        print(seg_1)
+        print(seg_2)
+        if is_crossing_stable(seg_1, seg_2):
+            return True
+        
+    return False
+
 def visualize(points, title):
     """ Given a list of points and a title, draws the curve traced out by it """
     input = map(lambda pt: [pt.x, pt.y], points)
@@ -433,7 +477,8 @@ if __name__ == "__main__":
     
     _, index_list = find_intersection(refined_points)
     for idx in index_list:
-        if not is_stable(refined_points, idx):
+        # if not is_stable(refined_points, idx):
+        if not is_stable_alt(refined_points, idx):
             print("Intersection is not stable!")
             sys.exit(0)
         else:
