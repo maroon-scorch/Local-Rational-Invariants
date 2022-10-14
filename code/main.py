@@ -146,6 +146,8 @@ def refine_input(points):
     refined_points = reduce(lambda prev, next: prev + index_segment(next[0], next[1]), adj_list)
     refined_points = [k for k, g in itertools.groupby(refined_points)]
     
+    # Avoid Grid Points by Perturbing it
+    # refined_points = avoid_grid(refined_points)
     return refined_points
 
 def vert_to_edges(points):
@@ -202,7 +204,7 @@ def smooth(points):
     # print(triple_list)
     
     # result = scale_input(, 2)
-        
+    
 def closest_grid_point(point):
     x_1 = math.floor(point.x)
     x_2 = math.ceil(point.x)
@@ -216,7 +218,7 @@ def closest_grid_point(point):
     
     result = sorted([p1, p2, p3, p4], key=lambda pt: dist(pt, point))
     return result[0]    
-    
+        
 
 def solve(points):
     """ Given a polygonal curve, constructs its grid approximation """
@@ -248,7 +250,7 @@ def solve(points):
                 previous_point = grid_list[-1]
                 diff_x = point.x - previous_point.x
                 diff_x = diff_x/abs(diff_x)
-                
+    
                 diff_y = point.y - previous_point.y
                 diff_y = diff_y/abs(diff_y)
                 
@@ -363,7 +365,7 @@ def is_stable(points, index):
     point_4 = Point(intersection.x, intersection.y  - epsilon)
     
     print(point_1)
-    
+        
     for idx in [index]:
         duplicate_1[idx] = point_1
         duplicate_2[idx] = point_2
@@ -420,7 +422,7 @@ def is_stable_alt(points, index):
         print(seg_2)
         if is_crossing_stable(seg_1, seg_2):
             return True
-        
+    
     return False
 
 def visualize(points, title):
@@ -448,6 +450,27 @@ def visualize(points, title):
     plt.title(title)
 
     plt.show()
+    
+def side(points, pt):
+    # Given a list of points and another single point, 
+    # turn True if the point is inside of the closed polygonal curve formed by the point list;
+    # otherwise return False.
+    
+    # Assumption: the first and last point in the list are the same(closed).
+    
+    odd = False
+    
+    i = 0
+    j = len(points) - 2
+    while i < len(points) - 2:
+        i = i + 1
+        if(((points[i].y > pt.y) != (points[j].y > pt.y)) and 
+           (pt.x < ((points[j].x - points[i].x) * (pt.y - points[i].y) / (points[j].y - points[i].y)) + points[i].x)):
+            
+            odd = not odd
+        j = i
+    return odd
+    
 
 # The main body of the code:
 if __name__ == "__main__":
@@ -456,7 +479,7 @@ if __name__ == "__main__":
     validate_input(points)
     
     # Apply appropriate scaling?
-    points = scale_input(points, 2)
+    # points = scale_input(points, 2)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
