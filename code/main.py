@@ -310,6 +310,7 @@ def intersection_point(edge_1, edge_2):
 def find_intersection(points):
     """ Given a list of points, find its intersections """
     edges = vert_to_edges(points)
+    points = list(map(lambda x: [x, False], points))
     intersections = []
     
     for idx1, ed in enumerate(edges):
@@ -318,12 +319,65 @@ def find_intersection(points):
             result = intersection_point(ed, current_edge)
             if result != []:
                 if idx1 != len(edges) - 1 and i != 0:
-                    intersections += (result, ed, current_edge)
-    print(intersections)
-    return intersections
-            
-        
+                    for pt in result:
+                        cross_pnt = Point(float(pt.x), float(pt.y))
+                        if points[idx1] == cross_pnt:
+                            points[idx1] = [cross_pnt, True]
+                        elif points[idx1 + 1] == cross_pnt:
+                            points[idx1 + 1] = [cross_pnt, True]
+                        else:
+                            points.insert(idx1 + 1, [cross_pnt, True])
+                        intersections.append(cross_pnt)
+    # intersections = list(set(intersections))
+    points = [k for k, g in itertools.groupby(points)]
     
+    index_list = []
+    for idx, pt in enumerate(points):
+        if pt[1]:
+            index_list.append(idx)
+            
+    points = list(map(lambda x: x[0], points))
+    
+    print(points)
+    print(intersections)
+    visualize(points, "With Intersection Input")
+    print("----------------------------")
+    
+    return intersections, index_list
+            
+def is_stable(points, index):
+    """ Given a list of points and an index of self intersection, discern if intersection is stable """
+    intersection = points[index]
+    # indices = [i for i, x in enumerate(points) if x == intersection]
+    # print(points)
+    # print(indices)
+    duplicate_1 = deepcopy(points);
+    duplicate_2 = deepcopy(points);
+    duplicate_3 = deepcopy(points);
+    duplicate_4 = deepcopy(points);
+    
+    # Perturbed points
+    point_1 = Point(intersection.x + epsilon, intersection.y)
+    point_2 = Point(intersection.x - epsilon, intersection.y)
+    point_3 = Point(intersection.x, intersection.y  + epsilon)
+    point_4 = Point(intersection.x, intersection.y  - epsilon)
+    
+    print(point_1)
+    
+    for idx in [index]:
+        duplicate_1[idx] = point_1
+        duplicate_2[idx] = point_2
+        duplicate_3[idx] = point_3
+        duplicate_4[idx] = point_4    
+        
+    intersection_1, _ = find_intersection(duplicate_1)
+    intersection_2, _ = find_intersection(duplicate_2)
+    intersection_3, _ = find_intersection(duplicate_3)
+    intersection_4, _ = find_intersection(duplicate_4)
+    
+    # print(intersection_1[0].vec)
+    # print(point_1.vec)
+    return approx_contains(intersection_1, point_1) and approx_contains(intersection_2, point_2) and approx_contains(intersection_3, point_3) and approx_contains(intersection_4, point_4)
 
 def visualize(points, title):
     """ Given a list of points and a title, draws the curve traced out by it """
@@ -375,7 +429,16 @@ if __name__ == "__main__":
     
     
     # finds the intersections first
-    find_intersection(refined_points)
+    duplicate = deepcopy(refined_points)
+    
+    _, index_list = find_intersection(refined_points)
+    for idx in index_list:
+        if not is_stable(refined_points, idx):
+            print("Intersection is not stable!")
+            sys.exit(0)
+        else:
+            print("Intersection is stable!")
+    
     visualize(refined_points, "Refined Input")
     # Hopefully this while loop terminates
     # Someone prove this?

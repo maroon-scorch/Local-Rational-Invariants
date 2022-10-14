@@ -46,6 +46,14 @@ def angle(p1, p2, p3):
     
     return angle
 
+def approx_contains(lst, point):
+    """ Given a list of points and a given point, check if the point is approximately in the list """
+    for pt in lst:
+        if dist(pt, point) < 0.000001:
+            return True
+        
+    return False
+
 def to_sp(pt):
     return sp.Point(pt.x, pt.y)
     
