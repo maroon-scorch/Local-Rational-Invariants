@@ -33,6 +33,17 @@ def is_on_edge(edge, point):
     return (dist(point,edge.start) + dist(point,edge.end) - edge.length() < epsilon)
 
 # To do: Find a better algorithm for this
+def intersection_point(edge_1, edge_2):
+    """Given two edges, find its intersection points (hopefully our code won't return some parallel lines, I am not checking this tentatively) """
+    
+    p1, p2, p3, p4 = to_sp(edge_1.start), to_sp(edge_1.end), to_sp(edge_2.start), to_sp(edge_2.end)
+    s1 = sp.Segment(p1, p2)
+    s2 = sp.Segment(p3, p4)
+    showIntersection = s1.intersection(s2)
+    
+    print(showIntersection)
+
+# To do: Find a better algorithm for this
 def intersect(edge_1, edge_2):
     """Given two edges, determine if they intersect or not"""
     

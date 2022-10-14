@@ -3,10 +3,12 @@ from re import X
 import sys, itertools
 from copy import copy, deepcopy
 from weakref import ref
-from point import Point, dist, angle
+from point import *
 import matplotlib.pyplot as plt
 from functools import reduce
 import math
+
+import sympy as sp
 
 from util import int_between
 
@@ -272,7 +274,6 @@ def solve(points):
     # adj_list.append([points[-1], points[0]])
     
     print(grid_list)
-    grid_list.append(Point(0, 1))
     return grid_list
 
 def solve_alt(points):
@@ -294,8 +295,35 @@ def solve_alt(points):
     
     print(grid_list)
     return grid_list
+
+def intersection_point(edge_1, edge_2):
+    """Given two edges, find its intersection points (hopefully our code won't return some parallel lines, I am not checking this tentatively) """
+    
+    p1, p2, p3, p4 = to_sp(edge_1[0]), to_sp(edge_1[1]), to_sp(edge_2[0]), to_sp(edge_2[1])
+    s1 = sp.Segment(p1, p2)
+    s2 = sp.Segment(p3, p4)
+    showIntersection = s1.intersection(s2)
+    
+    # print(showIntersection)
+    return showIntersection
+      
+def find_intersection(points):
+    """ Given a list of points, find its intersections """
+    edges = vert_to_edges(points)
+    intersections = []
+    
+    for idx1, ed in enumerate(edges):
+        for i in range(0, idx1 - 1):
+            current_edge = edges[i]
+            result = intersection_point(ed, current_edge)
+            if result != []:
+                if idx1 != len(edges) - 1 and i != 0:
+                    intersections += (result, ed, current_edge)
+    print(intersections)
+    return intersections
+            
         
-  
+    
 
 def visualize(points, title):
     """ Given a list of points and a title, draws the curve traced out by it """
@@ -330,7 +358,7 @@ if __name__ == "__main__":
     validate_input(points)
     
     # Apply appropriate scaling?
-    points = scale_input(points, 10)
+    points = scale_input(points, 2)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
@@ -344,8 +372,11 @@ if __name__ == "__main__":
     # Refine the inputs first
     refined_points = refine_input(points)
     print(refined_points)
-    visualize(refined_points, "Refined Input")
     
+    
+    # finds the intersections first
+    find_intersection(refined_points)
+    visualize(refined_points, "Refined Input")
     # Hopefully this while loop terminates
     # Someone prove this?
     # while not smooth(refined_points) or has_grid_point(refined_points):
@@ -355,7 +386,8 @@ if __name__ == "__main__":
     # refined_points = refine_input(refined_points)
     # visualize(refined_points, "Smooth and No Grid Points")
     
-    solution = solve_alt(refined_points)
-    visualize(solution, "Grid Approximation")
+    # solution = solve_alt(refined_points)
+    # visualize(solution, "Grid Approximation")
+    
     # solution = solve(refined_points)
     # visualize(refined_points + solution, "Grid Approximation")
