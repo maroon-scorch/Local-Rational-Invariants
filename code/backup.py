@@ -472,50 +472,10 @@ def side(points, pt):
     return odd
     
 
-def run(points, dimension):
-    validate_input(points)
-    
-    # Apply appropriate scaling?
-    # points = scale_input(points, 2)
-    
-    # If the curve is not closed, close it
-    if points[0] != points[-1]:
-        points.append(points[0])
-
-    print("This is a curve in dimension: ", dimension)
-    print("The list has length: ", len(points))
-    print("The list has points: ", points)
-    visualize(points, "Raw Input")
-    print("TEST")
-    # Refine the inputs first
-    refined_points = refine_input(points)
-    refined_points = avoid_grid(refined_points)
-    # refined_points = refine_input(refined_points)
-    visualize(refined_points, "Refined Input")
-    print("TEST")
-    
-    # finds the intersections first
-    duplicate = deepcopy(refined_points)
-    
-    _, index_list = find_intersection(refined_points)
-    for idx in index_list:
-        # if not is_stable(refined_points, idx):
-        if not is_stable_alt(refined_points, idx):
-            print("Intersection is not stable!")
-            sys.exit(0)
-        else:
-            print("Intersection is stable!")
-    
-    visualize(refined_points, "Refined Input")
-    
-
 # The main body of the code:
 if __name__ == "__main__":
     input_file = sys.argv[1]
     points, dimension = read_input(input_file)
-    run(points, dimension)
-    """
-    
     validate_input(points)
     
     # Apply appropriate scaling?
@@ -564,4 +524,3 @@ if __name__ == "__main__":
     
     # solution = solve(refined_points)
     # visualize(refined_points + solution, "Grid Approximation")
-    """
