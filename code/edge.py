@@ -27,10 +27,10 @@ class Edge:
         return dist(self.start, self.end)
     
     
-def is_on_edge(edge, point):
+def is_on_edge(start, end, point):
     """ Checks if the point lies on said edge """
     epsilon = 0.000001
-    return (dist(point,edge.start) + dist(point,edge.end) - edge.length() < epsilon)
+    return (dist(point, start) + dist(point, end) - dist(start, end) < epsilon)
 
 # To do: Find a better algorithm for this
 def intersection_point(edge_1, edge_2):

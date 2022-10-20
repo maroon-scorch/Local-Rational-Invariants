@@ -13,7 +13,7 @@ point_list = []
 
 screen_width = 400
 screen_height = 400
-ratio = 20
+ratio = 5
 
 # Setup of the window
 win.geometry("400x500")
