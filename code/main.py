@@ -124,6 +124,7 @@ def has_grid_point(points):
             return True
     return False
 
+# Note that this does not affect a straight horizontal line?
 def avoid_grid(points):
     result = []
     for pt in points:
@@ -151,13 +152,18 @@ def refine_input(points):
     return refined_points
 
 def vert_to_edges(points):
-    """Given a sequence of vertices, convert them into a list"""
+    """Given a sequence of vertices, convert them into a list of edges"""
     edges = []
     for idx, point in enumerate(points):
         if idx != len(points) - 1:
             edges.append([point, points[idx + 1]])
     edges.append([points[-1], points[0]]);
     return edges;
+
+def edges_to_vert(edges):
+    """Given a list of edges, convert them into a list of vertices"""
+    vert = list(map(lambda ed: ed[0], edges))
+    return vert
 
 def local_smooth(points, current_index, labels):
     if labels == [0, 1, 0]:
@@ -297,6 +303,42 @@ def solve_alt(points):
     
     print(grid_list)
     return grid_list
+
+def solve_project(points):
+    """ Given a polygonal curve, constructs its grid approximation """
+    grid_list = []
+    edge_list = vert_to_edges(points)
+    label_list = list(map(lambda p: [label_index(p[0]), label_index(p[1])], edge_list))
+    
+    for idx, edge in enumerate(edge_list):
+        print(edge)
+        current_label = label_list[idx]
+        if current_label[0] == current_label[1]:
+            if current_label[0] == 0:
+                # Horizontal line:
+                edge_1 = [Point(edge[0].x, math.ceil(edge[0].y)), Point(edge[1].x, math.ceil(edge[1].y))]
+                edge_2 = [Point(edge[0].x, math.floor(edge[0].y)), Point(edge[1].x, math.floor(edge[1].y))]
+                
+                if not is_left(edge[0], edge[1], edge_1[0]):
+                    edge_list.append(edge_1)
+                else:
+                    edge_list.append(edge_2)
+            elif current_label[0] == 1:
+                # Vertical line:
+                edge_1 = [Point(math.ceil(edge[0].x), edge[0].y), Point(math.ceil(edge[1].x), edge[1].y)]
+                edge_2 = [Point(math.floor(edge[0].x), edge[0].y), Point(math.floor(edge[1].x), edge[1].y)]
+                
+                if not is_left(edge[0], edge[1], edge_1[0]):
+                    edge_list.append(edge_1)
+                else:
+                    edge_list.append(edge_2)
+        else:
+            a = 1
+               
+    grid_list = edges_to_vert(edge_list)
+    return grid_list
+    
+    
 
 def intersection_point(edge_1, edge_2):
     """Given two edges, find its intersection points (hopefully our code won't return some parallel lines, I am not checking this tentatively) """
@@ -486,27 +528,27 @@ def run(points, dimension):
     print("The list has length: ", len(points))
     print("The list has points: ", points)
     visualize(points, "Raw Input")
-    print("TEST")
     # Refine the inputs first
     refined_points = refine_input(points)
     refined_points = avoid_grid(refined_points)
     # refined_points = refine_input(refined_points)
     visualize(refined_points, "Refined Input")
-    print("TEST")
     
     # finds the intersections first
-    duplicate = deepcopy(refined_points)
+    # duplicate = deepcopy(refined_points)
     
-    _, index_list = find_intersection(refined_points)
-    for idx in index_list:
-        # if not is_stable(refined_points, idx):
-        if not is_stable_alt(refined_points, idx):
-            print("Intersection is not stable!")
-            sys.exit(0)
-        else:
-            print("Intersection is stable!")
+    # _, index_list = find_intersection(refined_points)
+    # for idx in index_list:
+    #     # if not is_stable(refined_points, idx):
+    #     if not is_stable_alt(refined_points, idx):
+    #         print("Intersection is not stable!")
+    #         sys.exit(0)
+    #     else:
+    #         print("Intersection is stable!")
     
-    visualize(refined_points, "Refined Input")
+    # visualize(refined_points, "Refined Input")
+    solution = solve_project(refined_points)
+    visualize(solution, "Grid Approximation")
     
 
 # The main body of the code:
