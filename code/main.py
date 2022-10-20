@@ -151,7 +151,7 @@ def refine_input(points):
     return refined_points
 
 def vert_to_edges(points):
-    """Given a sequence of vertices, convert them into a list"""
+    """Given a sequence of vertices, convert them into a list of edges"""
     edges = []
     for idx, point in enumerate(points):
         if idx != len(points) - 1:
@@ -385,6 +385,10 @@ def is_left(start, end, point):
     result = (end.x - start.x)*(point.y - start.y) - (end.y - start.y)*(point.x - start.x)
     return result > 0
 
+def is_right(start, end, point):
+    result = (end.x - start.x)*(point.y - start.y) - (end.y - start.y)*(point.x - start.x)
+    return result < 0
+
 def is_crossing_stable(seg_1, seg_2):
     intersection = seg_1[1]
     
@@ -479,7 +483,7 @@ if __name__ == "__main__":
     validate_input(points)
     
     # Apply appropriate scaling?
-    # points = scale_input(points, 2)
+    points = scale_input(points, 5)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
@@ -496,16 +500,16 @@ if __name__ == "__main__":
     
     
     # finds the intersections first
-    duplicate = deepcopy(refined_points)
+    # duplicate = deepcopy(refined_points)
     
-    _, index_list = find_intersection(refined_points)
-    for idx in index_list:
-        # if not is_stable(refined_points, idx):
-        if not is_stable_alt(refined_points, idx):
-            print("Intersection is not stable!")
-            sys.exit(0)
-        else:
-            print("Intersection is stable!")
+    # _, index_list = find_intersection(refined_points)
+    # for idx in index_list:
+    #     # if not is_stable(refined_points, idx):
+    #     if not is_stable_alt(refined_points, idx):
+    #         print("Intersection is not stable!")
+    #         sys.exit(0)
+    #     else:
+    #         print("Intersection is stable!")
     
     visualize(refined_points, "Refined Input")
     # Hopefully this while loop terminates
@@ -517,8 +521,8 @@ if __name__ == "__main__":
     # refined_points = refine_input(refined_points)
     # visualize(refined_points, "Smooth and No Grid Points")
     
-    # solution = solve_alt(refined_points)
-    # visualize(solution, "Grid Approximation")
+    solution = solve_alt(refined_points)
+    visualize(solution, "Grid Approximation")
     
     # solution = solve(refined_points)
     # visualize(refined_points + solution, "Grid Approximation")
