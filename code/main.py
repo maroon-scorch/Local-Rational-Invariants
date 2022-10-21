@@ -4,6 +4,7 @@ import sys, itertools
 from copy import copy, deepcopy
 from weakref import ref
 from point import *
+# from projection import *
 import matplotlib.pyplot as plt
 from functools import reduce
 import math
@@ -157,8 +158,8 @@ def vert_to_edges(points):
     for idx, point in enumerate(points):
         if idx != len(points) - 1:
             edges.append([point, points[idx + 1]])
-    edges.append([points[-1], points[0]]);
-    return edges;
+    edges.append([points[-1], points[0]])
+    return edges
 
 def edges_to_vert(edges):
     """Given a list of edges, convert them into a list of vertices"""
@@ -223,8 +224,7 @@ def closest_grid_point(point):
     p4 = Point(x_2, y_2)
     
     result = sorted([p1, p2, p3, p4], key=lambda pt: dist(pt, point))
-    return result[0]    
-        
+    return result[0]  
 
 def solve(points):
     """ Given a polygonal curve, constructs its grid approximation """
@@ -304,9 +304,34 @@ def solve_alt(points):
     print(grid_list)
     return grid_list
 
+def grid_points(point):
+    x_1 = math.floor(point.x)
+    x_2 = math.ceil(point.x)
+    y_1 = math.floor(point.y)
+    y_2 = math.ceil(point.y)
+    
+    p1 = Point(x_1, y_1)
+    p2 = Point(x_1, y_2)
+    p3 = Point(x_2, y_1)
+    p4 = Point(x_2, y_2)
+    
+    return p1, p2, p3, p4
+
+# Need to change later
+def find_grid(pt, points):
+    x_list = list(filter(lambda p: pt.x == p.x, points))
+    y_list = list(filter(lambda p: pt.y == p.y, points))
+    result = x_list + y_list
+    return result[0]
+
+def is_grid_point(pt):
+    return isinstance(pt.x, int) and isinstance(pt.y, int)
+
 def solve_project(points):
     """ Given a polygonal curve, constructs its grid approximation """
+    print("TESTTTT")
     grid_list = []
+    grid_edge_list = []
     edge_list = vert_to_edges(points)
     label_list = list(map(lambda p: [label_index(p[0]), label_index(p[1])], edge_list))
     
@@ -320,22 +345,86 @@ def solve_project(points):
                 edge_2 = [Point(edge[0].x, math.floor(edge[0].y)), Point(edge[1].x, math.floor(edge[1].y))]
                 
                 if not is_left(edge[0], edge[1], edge_1[0]):
-                    edge_list.append(edge_1)
+                    grid_edge_list.append(edge_1)
                 else:
-                    edge_list.append(edge_2)
+                    grid_edge_list.append(edge_2)
             elif current_label[0] == 1:
                 # Vertical line:
                 edge_1 = [Point(math.ceil(edge[0].x), edge[0].y), Point(math.ceil(edge[1].x), edge[1].y)]
                 edge_2 = [Point(math.floor(edge[0].x), edge[0].y), Point(math.floor(edge[1].x), edge[1].y)]
                 
                 if not is_left(edge[0], edge[1], edge_1[0]):
-                    edge_list.append(edge_1)
+                    grid_edge_list.append(edge_1)
                 else:
-                    edge_list.append(edge_2)
+                    grid_edge_list.append(edge_2)
         else:
-            a = 1
-               
-    grid_list = edges_to_vert(edge_list)
+            print("------------------------")
+            start = edge[0]
+            end = edge[1]
+            midpoint = Point((start.x + end.x)/2, (start.y + end.y)/2)
+            p1, p2, p3, p4 = grid_points(midpoint)
+            
+            right_points = list(filter(lambda p: not is_left(start, end, p), [p1, p2, p3, p4]))
+            print(right_points)
+            if len(right_points) == 1:
+                edge[0] = edge[1]
+            #    only_right = right_points[0]
+            #    grid_edge_list.append([start, only_right])
+            #    grid_edge_list.append([only_right, end])
+            elif len(right_points) == 3:
+                grid_start = find_grid(start, right_points)
+                grid_end = find_grid(end, right_points)
+                right_points.remove(grid_start)
+                right_points.remove(grid_end)
+                
+                corner = right_points[0]
+                grid_edge_list.append([grid_start, corner])
+                grid_edge_list.append([corner, grid_end])
+                
+
+#remove hedges
+    # for ed_1, ed_2 in enumerate(grid_edge_list):
+    #     ed_1 = [start.ed_1, end.ed_1]
+    #     inverse_ed_2 = [end.ed_2, start.ed_2]
+    #     if ed_1 == inverse_ed_2:
+    #         grid_edge_list.remove(ed_1, ed_2)
+    #         # Q: Make sure the vertex list won't be missed?
+    #         grid_edge_list.append([start.ed_1, start.ed_1])
+    # return grid_edge_list
+
+                
+    grid_list = edges_to_vert(grid_edge_list)
+    # if grid_list[0] != grid_list[-1]:
+    #     grid_list.append(grid_list[0])
+    
+
+        
+        
+    # grid_list = list(filter(lambda p: is_grid_point(p), grid_list))
+    print(grid_list)
+    for ed in grid_edge_list:
+        start = ed[0]
+        end = ed[1]
+        plt.plot([start.x, end.x], [start.y, end.y], 'k-')
+    plt.show()
+    # input = map(lambda ed: [[ed[0].x, ed[0].y], [ed[1].x, ed[1].y]], grid_edge_list)
+    # # Plot of the Polygonal Curve
+    # fig = plt.figure()
+    # for i in range(0, len(input)):
+    #     plt.plot(input[i][0], input[i][1])
+        
+    # # Integer Grid
+    # ax = fig.gca()
+    # xmin, xmax = ax.get_xlim() 
+    # ymin, ymax = ax.get_ylim() 
+    # ax.set_xticks(int_between(xmin, xmax))
+    # ax.set_yticks(int_between(ymin, ymax))
+    # plt.grid()
+    # # Title
+    # plt.title("Edge of Grid")
+    # plt.show()
+    
+    
     return grid_list
     
     
@@ -395,10 +484,10 @@ def is_stable(points, index):
     # indices = [i for i, x in enumerate(points) if x == intersection]
     # print(points)
     # print(indices)
-    duplicate_1 = deepcopy(points);
-    duplicate_2 = deepcopy(points);
-    duplicate_3 = deepcopy(points);
-    duplicate_4 = deepcopy(points);
+    duplicate_1 = deepcopy(points)
+    duplicate_2 = deepcopy(points)
+    duplicate_3 = deepcopy(points)
+    duplicate_4 = deepcopy(points)
     
     # Perturbed points
     point_1 = Point(intersection.x + epsilon, intersection.y)
@@ -471,6 +560,7 @@ def is_stable_alt(points, index):
     
     return False
 
+
 def visualize(points, title):
     """ Given a list of points and a title, draws the curve traced out by it """
     input = map(lambda pt: [pt.x, pt.y], points)
@@ -516,18 +606,18 @@ def side(points, pt):
             odd = not odd
         j = i
     return odd
-    
+
 
 def run(points, dimension):
     validate_input(points)
-    
+        
     # Apply appropriate scaling?
     # points = scale_input(points, 2)
     
     # If the curve is not closed, close it
     if points[0] != points[-1]:
         points.append(points[0])
-
+        
     print("This is a curve in dimension: ", dimension)
     print("The list has length: ", len(points))
     print("The list has points: ", points)
@@ -535,25 +625,35 @@ def run(points, dimension):
     # Refine the inputs first
     refined_points = refine_input(points)
     refined_points = avoid_grid(refined_points)
-    # refined_points = refine_input(refined_points)
+    refined_points = refine_input(refined_points)
     visualize(refined_points, "Refined Input")
     
     # finds the intersections first
     # duplicate = deepcopy(refined_points)
-    
+        
     # _, index_list = find_intersection(refined_points)
     # for idx in index_list:
-    #     # if not is_stable(refined_points, idx):
+    #     if not is_stable(refined_points, idx):
     #     if not is_stable_alt(refined_points, idx):
     #         print("Intersection is not stable!")
     #         sys.exit(0)
     #     else:
     #         print("Intersection is stable!")
-    
+        
     # visualize(refined_points, "Refined Input")
+    # solution = solve_alt(refined_points)
     solution = solve_project(refined_points)
     visualize(solution, "Grid Approximation")
     
+def main_projection(points):
+     for i in range(0, len(points)):
+         i = 0
+         j = len(points) - 2
+         projection.edge_type.vertical, projection.edge_type.horizontal, projection.edge_type.crooked =  projection.edge_type(j,i)
+         if projection.edge_type(j,i) == projection.edge_type.vertical:
+            # for 
+            projection.map_grid_v()
+
 
 # The main body of the code:
 if __name__ == "__main__":
