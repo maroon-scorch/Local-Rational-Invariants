@@ -179,7 +179,7 @@ def smooth(points):
     for idx, pt in enumerate(label_list):
         if idx < len(points) - 2:
             triple_list.append((idx + 1, [label_list[idx], label_list[idx + 1], label_list[idx + 2]]))
-    
+            
     triple_list.append((len(points) - 1, [label_list[-2], label_list[-1], label_list[0]]))
     triple_list.insert(0, (0, [label_list[-1], label_list[0], label_list[1]]))
     
@@ -207,8 +207,6 @@ def smooth(points):
             
     print("No sharp points!")
     return True
-    # print(label_list)
-    # print(triple_list)
     
     # result = scale_input(, 2)
     
@@ -336,7 +334,6 @@ def solve_project(points):
     label_list = list(map(lambda p: [label_index(p[0]), label_index(p[1])], edge_list))
     
     for idx, edge in enumerate(edge_list):
-        print(edge)
         current_label = label_list[idx]
         if current_label[0] == current_label[1]:
             if current_label[0] == 0:
@@ -358,19 +355,17 @@ def solve_project(points):
                 else:
                     grid_edge_list.append(edge_2)
         else:
-            print("------------------------")
             start = edge[0]
             end = edge[1]
             midpoint = Point((start.x + end.x)/2, (start.y + end.y)/2)
             p1, p2, p3, p4 = grid_points(midpoint)
             
             right_points = list(filter(lambda p: not is_left(start, end, p), [p1, p2, p3, p4]))
-            print(right_points)
             if len(right_points) == 1:
                 edge[0] = edge[1]
-            #    only_right = right_points[0]
-            #    grid_edge_list.append([start, only_right])
-            #    grid_edge_list.append([only_right, end])
+                # only_right = right_points[0]
+                # grid_edge_list.append([start, only_right])
+                # grid_edge_list.append([only_right, end])
             elif len(right_points) == 3:
                 grid_start = find_grid(start, right_points)
                 grid_end = find_grid(end, right_points)
@@ -381,31 +376,40 @@ def solve_project(points):
                 grid_edge_list.append([grid_start, corner])
                 grid_edge_list.append([corner, grid_end])
                 
+    # Remove hedges
+    for i, ed in enumerate(grid_edge_list):
+        print(str(i) + ": " + str(ed))
+    faulty_edge_list = []
+    
+    for idx, ed_1 in enumerate(grid_edge_list):
+        if idx != len(grid_edge_list) - 1:
+            second_idx = idx + 1
+        else:
+            second_idx = 0
+        ed_2 = grid_edge_list[second_idx]
+        inverse_ed_2 = [ed_2[1], ed_2[0]]
+        if ed_1 == inverse_ed_2:
+            faulty_edge_list.append(idx)
+            faulty_edge_list.append(second_idx)
 
-#remove hedges
-    # for ed_1, ed_2 in enumerate(grid_edge_list):
-    #     ed_1 = [start.ed_1, end.ed_1]
-    #     inverse_ed_2 = [end.ed_2, start.ed_2]
-    #     if ed_1 == inverse_ed_2:
-    #         grid_edge_list.remove(ed_1, ed_2)
-    #         # Q: Make sure the vertex list won't be missed?
-    #         grid_edge_list.append([start.ed_1, start.ed_1])
-    # return grid_edge_list
-
+    print(faulty_edge_list)
+    faulty_edge_list.sort(reverse=True)
+    
+    for i in faulty_edge_list:
+        grid_edge_list.pop(i)
                 
     grid_list = edges_to_vert(grid_edge_list)
     # if grid_list[0] != grid_list[-1]:
     #     grid_list.append(grid_list[0])
     
-
-        
-        
+         
     # grid_list = list(filter(lambda p: is_grid_point(p), grid_list))
-    print(grid_list)
-    for ed in grid_edge_list:
+    # print(grid_list)
+    for i, ed in enumerate(grid_edge_list):
         start = ed[0]
         end = ed[1]
         plt.plot([start.x, end.x], [start.y, end.y], 'k-')
+        # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
     plt.show()
     # input = map(lambda ed: [[ed[0].x, ed[0].y], [ed[1].x, ed[1].y]], grid_edge_list)
     # # Plot of the Polygonal Curve
@@ -427,6 +431,9 @@ def solve_project(points):
     
     return grid_list
     
+def solve_direction(points):
+    grid_list = []
+    return grid_list
     
 
 def intersection_point(edge_1, edge_2):
@@ -525,7 +532,6 @@ def is_crossing_stable(seg_1, seg_2):
     
     e1_start = seg_1[0]
     e1_end = seg_1[2]
-    
     e2_start = seg_2[0]
     e2_end = seg_2[2]
     
@@ -575,6 +581,7 @@ def visualize(points, title):
         if is_on_x and is_on_y:
             color = 'g-o'
         plt.plot(x_pts[i], y_pts[i], color)
+        plt.annotate(i, (x_pts[i], y_pts[i]))
     # Integer Grid
     ax = fig.gca()
     xmin, xmax = ax.get_xlim() 
