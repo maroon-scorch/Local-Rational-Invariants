@@ -51,6 +51,8 @@ click_num=0
 
 def clickClearButton():
     point_list.clear()
+    prev_point[0] = None
+    prev_point[1] = None
     canvas.delete('all')
     
 def clickRunButton():
