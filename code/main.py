@@ -58,11 +58,15 @@ def validate_input(points):
     ang_list.append([points[-2], points[-1], points[0]])
     ang_list.append([points[-1], points[0], points[1]])
     
+    faulty_ver_list = []
     for triple in ang_list:
         ang = angle(triple[0], triple[1], triple[2])
         if not (min_range <= ang and ang <= max_range):
+            faulty_ver_list.append(triple[1])
             print("Error: " + str(triple) + " has angle out of range - " + str(ang))
             # sys.exit(0)
+    print("Bad Vertices: " + str(faulty_ver_list))
+    return faulty_ver_list
             
 def scale_input(points, n):
     """ Scales the points by a factor of n (integer) """
@@ -294,8 +298,8 @@ def solve_alt(points):
             grid_list.append(point)
         else:
             previous_point = grid_list[-1]
-            next_point_1 = Point(previous_point.x, point.y);
-            next_point_2 = Point(point.x, next_point_1.y);
+            next_point_1 = Point(previous_point.x, point.y)
+            next_point_2 = Point(point.x, next_point_1.y)
             grid_list.append(next_point_1)
             grid_list.append(next_point_2)
     
@@ -582,6 +586,10 @@ def visualize(points, title):
             color = 'g-o'
         plt.plot(x_pts[i], y_pts[i], color)
         plt.annotate(i, (x_pts[i], y_pts[i]))
+    for ver in validate_input.faulty_ver_list(points):
+        (ver_x, ver_y) = ver
+        plt.scatter(ver_x, ver_y, 'diamond', 'r')
+    plt.show()
     # Integer Grid
     ax = fig.gca()
     xmin, xmax = ax.get_xlim() 
@@ -651,15 +659,6 @@ def run(points, dimension):
     # solution = solve_alt(refined_points)
     solution = solve_project(refined_points)
     visualize(solution, "Grid Approximation")
-    
-def main_projection(points):
-     for i in range(0, len(points)):
-         i = 0
-         j = len(points) - 2
-         projection.edge_type.vertical, projection.edge_type.horizontal, projection.edge_type.crooked =  projection.edge_type(j,i)
-         if projection.edge_type(j,i) == projection.edge_type.vertical:
-            # for 
-            projection.map_grid_v()
 
 
 # The main body of the code:
