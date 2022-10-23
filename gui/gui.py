@@ -34,8 +34,8 @@ def draw_line(event):
    if prev_point != [None, None]:
        canvas.create_line(prev_point[0], prev_point[1], x1, y1, fill="black", width=5)
 
-   prev_point[0] = x1;
-   prev_point[1] = y1;
+   prev_point[0] = x1
+   prev_point[1] = y1
    cartX = x1 - screen_width/2
    cartY = screen_height/2 - y1
    cartPoint = closest_grid_point(Point(cartX/ratio, cartY/ratio))
