@@ -1,8 +1,6 @@
 #!/bin/python3
-from re import X
 import sys, itertools
 from copy import copy, deepcopy
-from weakref import ref
 from point import *
 # from projection import *
 import matplotlib.pyplot as plt
@@ -35,6 +33,25 @@ def read_input(inputFile):
     
     return poly_points, dimension
 
+def bad_vertices(points):
+    """Given a list of points, find its bad vertices (angle too low) """
+    # Angle of any three consecutive points are 160-200 degree
+    ang_list = []
+    for idx, pt in enumerate(points):
+        if idx < len(points) - 2:
+            ang_list.append([pt, points[idx + 1], points[idx + 2]])
+    
+    ang_list.append([points[-2], points[-1], points[0]])
+    ang_list.append([points[-1], points[0], points[1]])
+    
+    faulty_ver_list = []
+    for triple in ang_list:
+        ang = angle(triple[0], triple[1], triple[2])
+        if not (min_range <= ang and ang <= max_range):
+            faulty_ver_list.append([triple[1].x, triple[1].y])
+    
+    return faulty_ver_list
+
 def validate_input(points):
     """ Checks if the list of points matches the input specification
     """
@@ -50,23 +67,10 @@ def validate_input(points):
             sys.exit(0)
             
     # Angle of any three consecutive points are 160-200 degree
-    ang_list = []
-    for idx, pt in enumerate(points):
-        if idx < len(points) - 2:
-            ang_list.append([pt, points[idx + 1], points[idx + 2]])
-    
-    ang_list.append([points[-2], points[-1], points[0]])
-    ang_list.append([points[-1], points[0], points[1]])
-    
-    faulty_ver_list = []
-    for triple in ang_list:
-        ang = angle(triple[0], triple[1], triple[2])
-        if not (min_range <= ang and ang <= max_range):
-            faulty_ver_list.append(triple[1])
-            print("Error: " + str(triple) + " has angle out of range - " + str(ang))
+    faulty_ver_list = bad_vertices(points)
+    for vert in faulty_ver_list:
+        print("Error: " + str(vert) + " has angle out of range.")
             # sys.exit(0)
-    print("Bad Vertices: " + str(faulty_ver_list))
-    return faulty_ver_list
             
 def scale_input(points, n):
     """ Scales the points by a factor of n (integer) """
@@ -163,6 +167,13 @@ def vert_to_edges(points):
         if idx != len(points) - 1:
             edges.append([point, points[idx + 1]])
     edges.append([points[-1], points[0]])
+    return edges
+
+def vert_to_edges_open(points):
+    edges = []
+    for idx, point in enumerate(points):
+        if idx != len(points) - 1:
+            edges.append([point, points[idx + 1]])
     return edges
 
 def edges_to_vert(edges):
@@ -329,6 +340,14 @@ def find_grid(pt, points):
 def is_grid_point(pt):
     return isinstance(pt.x, int) and isinstance(pt.y, int)
 
+def visualize_edges(grid_edge_list):
+    for i, ed in enumerate(grid_edge_list):
+        start = ed[0]
+        end = ed[1]
+        plt.plot([start.x, end.x], [start.y, end.y], 'k-')
+        plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
+    plt.show()
+
 def solve_project(points):
     """ Given a polygonal curve, constructs its grid approximation """
     print("TESTTTT")
@@ -401,7 +420,8 @@ def solve_project(points):
     
     for i in faulty_edge_list:
         grid_edge_list.pop(i)
-                
+
+    visualize_edges(grid_edge_list)         
     grid_list = edges_to_vert(grid_edge_list)
     # if grid_list[0] != grid_list[-1]:
     #     grid_list.append(grid_list[0])
@@ -409,12 +429,7 @@ def solve_project(points):
          
     # grid_list = list(filter(lambda p: is_grid_point(p), grid_list))
     # print(grid_list)
-    for i, ed in enumerate(grid_edge_list):
-        start = ed[0]
-        end = ed[1]
-        plt.plot([start.x, end.x], [start.y, end.y], 'k-')
-        # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
-    plt.show()
+
     # input = map(lambda ed: [[ed[0].x, ed[0].y], [ed[1].x, ed[1].y]], grid_edge_list)
     # # Plot of the Polygonal Curve
     # fig = plt.figure()
@@ -484,7 +499,7 @@ def find_intersection(points):
     
     print(points)
     print(intersections)
-    visualize(points, "With Intersection Input")
+    visualize(points, "With Intersection Input", True)
     print("----------------------------")
     
     return intersections, index_list
@@ -571,7 +586,7 @@ def is_stable_alt(points, index):
     return False
 
 
-def visualize(points, title):
+def visualize(points, title, want_bad_vert):
     """ Given a list of points and a title, draws the curve traced out by it """
     input = map(lambda pt: [pt.x, pt.y], points)
     x_pts, y_pts = zip(*input) #create lists of x and y values
@@ -586,10 +601,15 @@ def visualize(points, title):
             color = 'g-o'
         plt.plot(x_pts[i], y_pts[i], color)
         plt.annotate(i, (x_pts[i], y_pts[i]))
-    for ver in validate_input.faulty_ver_list(points):
-        (ver_x, ver_y) = ver
-        plt.scatter(ver_x, ver_y, 'diamond', 'r')
-    plt.show()
+
+    if want_bad_vert:
+        ver_x, ver_y = zip(*bad_vertices(points))
+        plt.scatter(ver_x, ver_y, c ="yellow",
+                linewidths = 2,
+                marker ="^",
+                edgecolor ="red",
+                s = 200)
+    
     # Integer Grid
     ax = fig.gca()
     xmin, xmax = ax.get_xlim() 
@@ -622,6 +642,48 @@ def side(points, pt):
         j = i
     return odd
 
+def solve_half_length(points):
+    grid_edge_list = []
+    edge_list = vert_to_edges_open(points)
+
+    for edge in edge_list:
+        current_p1 = edge[0]
+        current_p2 = edge[1]
+
+        mid_x_1 = (math.floor(current_p1.x) + math.ceil(current_p1.x))/2
+        mid_y_1 = (math.floor(current_p1.y) + math.ceil(current_p1.y))/2
+        mid_x_2 = (math.floor(current_p2.x) + math.ceil(current_p2.x))/2
+        mid_y_2 = (math.floor(current_p2.y) + math.ceil(current_p2.y))/2
+
+        midpoint = Point((current_p1.x + current_p2.x)/2, (current_p1.y + current_p2.y)/2)
+        c1, _, _, c1_op = grid_points(midpoint)
+        center = Point((c1.x + c1_op.x)/2, (c1.y + c1_op.y)/2)
+
+        grid_edge_list.append([Point(mid_x_1, mid_y_1), center])
+        grid_edge_list.append([center, Point(mid_x_2, mid_y_2)])
+
+    faulty_edge_list = []
+    for idx, ed_1 in enumerate(grid_edge_list):
+        if idx != len(grid_edge_list) - 1:
+            second_idx = idx + 1
+        else:
+            second_idx = 0
+        ed_2 = grid_edge_list[second_idx]
+        inverse_ed_2 = [ed_2[1], ed_2[0]]
+        if ed_1 == inverse_ed_2 or ed_1 == ed_2:
+            faulty_edge_list.append(idx)
+            faulty_edge_list.append(second_idx)
+
+    print(faulty_edge_list)
+    faulty_edge_list.sort(reverse=True)
+    
+    for i in faulty_edge_list:
+        grid_edge_list.pop(i)
+
+    for i, ed in enumerate(grid_edge_list):
+        print(str(i) + ": " + str(ed))
+
+    visualize_edges(grid_edge_list)
 
 def run(points, dimension):
     validate_input(points)
@@ -636,12 +698,12 @@ def run(points, dimension):
     print("This is a curve in dimension: ", dimension)
     print("The list has length: ", len(points))
     print("The list has points: ", points)
-    visualize(points, "Raw Input")
+    visualize(points, "Raw Input", True)
     # Refine the inputs first
     refined_points = refine_input(points)
     refined_points = avoid_grid(refined_points)
     refined_points = refine_input(refined_points)
-    visualize(refined_points, "Refined Input")
+    visualize(refined_points, "Refined Input", True)
     
     # finds the intersections first
     # duplicate = deepcopy(refined_points)
@@ -657,8 +719,10 @@ def run(points, dimension):
         
     # visualize(refined_points, "Refined Input")
     # solution = solve_alt(refined_points)
-    solution = solve_project(refined_points)
-    visualize(solution, "Grid Approximation")
+    # solution = solve_project(refined_points)
+    # visualize(solution, "Grid Approximation", False)
+    solution = solve_half_length(refined_points)
+    # solution = solve_halfLength(refined_points)
 
 
 # The main body of the code:
