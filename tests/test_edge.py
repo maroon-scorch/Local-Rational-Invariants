@@ -2,7 +2,7 @@
 import sys
 import pytest, math
 
-sys.path.insert(1, '../code')
+sys.path.insert(1, '../code/data')
 
 # Import
 from point import *

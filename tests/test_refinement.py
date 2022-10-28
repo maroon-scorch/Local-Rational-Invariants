@@ -4,7 +4,7 @@ sys.path.insert(1, '../code')
 import pytest, math
 
 # Import
-from point import Point
+from data.point import Point
 from main import index_segment
 
 def test_index_segment():

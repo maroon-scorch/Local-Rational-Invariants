@@ -5,7 +5,7 @@ import pytest, math
 sys.path.insert(1, '../code')
 
 # Import
-from point import Point, dist, angle
+from data.point import Point, dist, angle
 
 def test_dist():
     assert dist(Point(1, 3), Point(1, 3)) == 0
