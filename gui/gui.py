@@ -4,8 +4,9 @@ from tkinter import ttk
 import os
 
 sys.path.insert(1, '../code')
-from point import Point
-from main import run, closest_grid_point
+from data.point import Point
+from main import run
+from util import closest_grid_point
 
 win=Tk()
 
