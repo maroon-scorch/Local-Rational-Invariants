@@ -1,13 +1,11 @@
 import sys, itertools
 from copy import copy, deepcopy
-from code.main import vert_to_edges_open, intersection_point, is_crossing_stable, visualize
-from point import *
+from main import intersection_point, is_crossing_stable, run
+from data.point import *
+from util import *
 # from projection import *
 import matplotlib.pyplot as plt
-from functools import reduce
 import math
-
-import sympy as sp
 
 from util import int_between
 
@@ -75,7 +73,7 @@ def getcurve(low, high, num_points):
     curve = vert_to_edges_open(points) 
     return curve
     
-def run(low, high, num_points, dimension):
+def generate(low, high, num_points, dimension):
     # # If the curve is not closed, close it
     # if points[0] != points[-1]:
     #     points.append(points[0])
@@ -83,6 +81,30 @@ def run(low, high, num_points, dimension):
     curve = getcurve(low, high, num_points)
 
     print("This is a curve in dimension: ", dimension)
-    print("The list has length: ", len(curve))
+    # print("The list has length: ", len(curve))
     print("The list has points: ", num_points)
     visualize(points, "Random Generated Points", True)
+    
+    
+def custom_cuve(curve_x, curve_y, start, stop, num_points, scale):
+    # Given a parameterized function for a curve, produces its polygonal approximation
+    samples = np.linspace(start, stop, num=num_points).tolist()
+    print(samples)
+    
+    points = []
+    for t in samples:
+        current_x = round(scale*curve_x(t))
+        current_y = round(scale*curve_y(t))
+        points.append(Point(current_x, current_y))
+        
+    return points
+
+generate(-10, 10, 20, 2)
+      
+# f_x = lambda t: math.cos(t)
+# f_y = lambda t: math.sin(2*t)
+# theta = math.pi/4
+# t_x = lambda t: f_x(t)*math.cos(theta) - f_y(t)*math.sin(theta)
+# t_y = lambda t: f_x(t)*math.sin(theta) + f_y(t)*math.cos(theta)
+# points = custom_cuve(t_x, t_y, 0, 2*math.pi, 100, 30)
+# run(points, 2, False)

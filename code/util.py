@@ -136,7 +136,7 @@ def visualize(points, title, want_bad_vert):
         if is_on_x and is_on_y:
             color = 'g-o'
         plt.plot(x_pts[i], y_pts[i], color)
-        plt.annotate(i, (x_pts[i], y_pts[i]))
+        # plt.annotate(i, (x_pts[i], y_pts[i]))
 
     if want_bad_vert:
         ver_x, ver_y = zip(*bad_vertices(points))

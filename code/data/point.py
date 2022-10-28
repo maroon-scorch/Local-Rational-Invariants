@@ -56,5 +56,8 @@ def approx_contains(lst, point):
 
 def to_sp(pt):
     return sp.Point(pt.x, pt.y)
+
+def midpoint_of(p1, p2):
+    return Point((p1.x + p2.x)/2, (p1.y + p2.y)/2)
     
     

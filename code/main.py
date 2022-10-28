@@ -311,14 +311,14 @@ def side(points, pt):
 # --------------------------------------------------------
 #               Main Operation
 # --------------------------------------------------------
-def run(points, dimension):
+def run(points, dimension, close):
     validate_input(points)
         
     # Apply appropriate scaling?
     # points = scale_input(points, 2)
     
     # If the curve is not closed, close it
-    if points[0] != points[-1]:
+    if close and points[0] != points[-1]:
         points.append(points[0])
         
     print("This is a curve in dimension: ", dimension)
@@ -348,6 +348,7 @@ def run(points, dimension):
     # solution = solve_project(refined_points)
     # visualize(solution, "Grid Approximation", False)
     solution = solve_half_length(refined_points)
+    # visualize(solution, "Title", False)
     # solution = solve_halfLength(refined_points)
 
 
@@ -355,4 +356,4 @@ def run(points, dimension):
 if __name__ == "__main__":
     input_file = sys.argv[1]
     points, dimension = read_input(input_file)
-    run(points, dimension)
+    run(points, dimension, True)
