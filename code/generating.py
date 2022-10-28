@@ -58,15 +58,32 @@ def is_current_stable(points, p):
         
 def getpts(low, high, num_points):
     result = []
-    for i in range(num_points):
-        p = Point(random.uniform(low, high), random.uniform(low, high))
-        while ((p.x - math.floor(p.x) < 0.001 and p.y - math.floor(p.y) < 0.001) # Avoid grid points
-               or (i >= 2 and 
-                   (faulty_vertex(result[i-2], result[i-1], p) or # Avoid bad vertices
-                    not is_current_stable(result, p)))): # Avoid unstable-intersections
-            p = Point(random.uniform(low, high), random.uniform(low, high))  
-        result.append(p)
+    result.append(random_point(low, high))
+    next_point = random_point(low, high)
+    # Ensure second point is different
+    while next_point == result[0]:
+        next_point = random_point(low, high)
+    result.append(next_point)
+    
+    for i in range(num_points - 2):
+        dprev_point = result[i]
+        prev_point = result[i + 1]
+        next_point = random_point(low, high)
+        ang = angle(dprev_point, prev_point, next_point)
+        while not (min_range <= ang and ang <= max_range):
+            next_point = random_point(low, high)
+            ang = angle(dprev_point, prev_point, next_point)
+        result.append(next_point)
     return result
+    # for i in range(num_points):
+    #     p = Point(random.uniform(low, high), random.uniform(low, high))
+    #     while ((p.x - math.floor(p.x) < 0.001 and p.y - math.floor(p.y) < 0.001) # Avoid grid points
+    #            or (i >= 2 and 
+    #                (faulty_vertex(result[i-2], result[i-1], p) or # Avoid bad vertices
+    #                 not is_current_stable(result, p)))): # Avoid unstable-intersections
+    #         p = Point(random.uniform(low, high), random.uniform(low, high))  
+    #     result.append(p)
+    # return result
     
 def getcurve(low, high, num_points):
     points = getpts(low, high, num_points)
@@ -78,13 +95,56 @@ def generate(low, high, num_points, dimension):
     # if points[0] != points[-1]:
     #     points.append(points[0])
     points = getpts(low, high, num_points)
-    curve = getcurve(low, high, num_points)
+    # curve = getcurve(low, high, num_points)
 
     print("This is a curve in dimension: ", dimension)
     # print("The list has length: ", len(curve))
     print("The list has points: ", num_points)
     visualize(points, "Random Generated Points", True)
+
+def random_point(low, high):
+    px = int(round(random.uniform(low, high)))
+    py = int(round(random.uniform(low, high)))
+    return Point(px, py)
+
+def find_vertice(start, end):
+    vec1 = unit_vector(end.vec - start.vec)
+    per_vec1 = unit_vector(np.array([-vec1[1], vec1[0]]))
+    matrix = np.column_stack((vec1, per_vec1))
     
+    radian = random.uniform(-20/180*math.pi, 20/180*math.pi)
+    x_pos = math.cos(radian)
+    y_pos = math.sin(radian)
+    vector = np.array([[x_pos, y_pos]])
+    print(vector)
+    transformed_vec = np.matmul(matrix, np.transpose(vector))
+    result_vec = end.vec + np.array(transformed_vec[0][0], transformed_vec[1][0])
+    
+    return Point(result_vec[0], result_vec[1])
+
+def generate_curve(low, high, num_points, dimension):
+    assert num_points > 1
+    result = []
+    result.append(random_point(low, high))
+    
+    next_point = random_point(low, high)
+    # Ensure second point is different
+    while next_point == result[0]:
+        next_point = random_point(low, high)
+    result.append(next_point)
+    
+    for i in range(num_points - 2):
+        dprev_point = result[i]
+        prev_point = result[i + 1]
+        next_point = find_vertice(dprev_point, prev_point)
+        result.append(next_point)
+        # while ((p.x - math.floor(p.x) < 0.001 and p.y - math.floor(p.y) < 0.001) # Avoid grid points
+        #        or (i >= 2 and 
+        #            (faulty_vertex(result[i-2], result[i-1], p) or # Avoid bad vertices
+        #             not is_current_stable(result, p)))): # Avoid unstable-intersections
+        #     p = Point(random.uniform(low, high), random.uniform(low, high))  
+        # result.append(p)
+    return result
     
 def custom_cuve(curve_x, curve_y, start, stop, num_points, scale):
     # Given a parameterized function for a curve, produces its polygonal approximation
@@ -99,7 +159,9 @@ def custom_cuve(curve_x, curve_y, start, stop, num_points, scale):
         
     return points
 
-generate(-10, 10, 20, 2)
+points = generate_curve(-10, 10, 10, 2)
+# points = getpts(-10, 10, 3)
+visualize(points, "Title", True)
       
 # f_x = lambda t: math.cos(t)
 # f_y = lambda t: math.sin(2*t)

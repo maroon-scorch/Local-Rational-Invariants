@@ -66,6 +66,7 @@ def bad_vertices(points):
     for triple in ang_list:
         ang = angle(triple[0], triple[1], triple[2])
         if not (min_range <= ang and ang <= max_range):
+            print(ang)
             faulty_ver_list.append([triple[1].x, triple[1].y])
     
     return faulty_ver_list
@@ -136,7 +137,7 @@ def visualize(points, title, want_bad_vert):
         if is_on_x and is_on_y:
             color = 'g-o'
         plt.plot(x_pts[i], y_pts[i], color)
-        # plt.annotate(i, (x_pts[i], y_pts[i]))
+        plt.annotate(i, (x_pts[i], y_pts[i]))
 
     if want_bad_vert:
         ver_x, ver_y = zip(*bad_vertices(points))
