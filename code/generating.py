@@ -109,8 +109,11 @@ def random_point(low, high):
 
 def find_vertice(start, end):
     vec1 = unit_vector(end.vec - start.vec)
-    per_vec1 = unit_vector(np.array([-vec1[1], vec1[0]]))
+    per_vec1 = np.array([-vec1[1], vec1[0]])
+    print(vec1)
+    print(per_vec1)
     matrix = np.column_stack((vec1, per_vec1))
+    print(matrix)
     
     radian = random.uniform(-20/180*math.pi, 20/180*math.pi)
     x_pos = math.cos(radian)
@@ -124,8 +127,8 @@ def find_vertice(start, end):
 
 def generate_curve(low, high, num_points, dimension):
     assert num_points > 1
-    result = []
-    result.append(random_point(low, high))
+    result = [Point(0, 0)]
+    # result.append(random_point(low, high))
     
     next_point = random_point(low, high)
     # Ensure second point is different
