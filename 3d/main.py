@@ -11,7 +11,7 @@ epsilon = 0.01
 delta = 0.00000000001
 min_range = 160/180*math.pi
 max_range = 200/180*math.pi
-max_iter = 10
+max_iter = 5
 
 # Run program using 'python main.py [directory to file]'
 def read_input(inputFile):
@@ -349,7 +349,7 @@ def run(points, dimension, close):
         i = i + 1
 
     print("Has Grid Points: ", has_grid_point(refined_points))
-    visualize(refined_points, "Refined Input", False)
+    # visualize(refined_points, "Refined Input", False)
     print("Refined Points: ", refined_points)
     solution = solve_half_length(refined_points)
     print(solution)
