@@ -230,7 +230,7 @@ def solve_half_length(points):
     # for i, ed in enumerate(grid_edge_list):
     #     print(str(i) + ": " + str(ed))
 
-    visualize_edges(grid_edge_list)
+    # visualize_edges(grid_edge_list)
     grid_list = edges_to_vert(grid_edge_list)
     
     return grid_list

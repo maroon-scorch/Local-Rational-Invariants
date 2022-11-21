@@ -44,8 +44,8 @@ def validate_input(points):
             
     # Angle of any three consecutive points are 160-200 degree
     faulty_ver_list = bad_vertices(points)
-    for vert in faulty_ver_list:
-        print("Error: " + str(vert) + " has angle out of range.")
+    # for vert in faulty_ver_list:
+    #     print("Error: " + str(vert) + " has angle out of range.")
             # sys.exit(0)
             
 def scale_input(points, n):
@@ -321,15 +321,15 @@ def run(points, dimension, close):
     if close and points[0] != points[-1]:
         points.append(points[0])
         
-    print("This is a curve in dimension: ", dimension)
-    print("The list has length: ", len(points))
-    print("The list has points: ", points)
-    visualize(points, "Raw Input", True)
+    # print("This is a curve in dimension: ", dimension)
+    # print("The list has length: ", len(points))
+    # print("The list has points: ", points)
+    # visualize(points, "Raw Input", True)
     # Refine the inputs first
     refined_points = refine_input(points)
     refined_points = avoid_grid(refined_points)
     refined_points = refine_input(refined_points)
-    visualize(refined_points, "Refined Input", True)
+    # visualize(refined_points, "Refined Input", True)
     
     # finds the intersections first
     # duplicate = deepcopy(refined_points)
@@ -348,6 +348,8 @@ def run(points, dimension, close):
     # solution = solve_project(refined_points)
     # visualize(solution, "Grid Approximation", False)
     solution = solve_half_length(refined_points)
+    solution = scale_input(solution, 2)
+    return solution
     # visualize(solution, "Title", False)
     # solution = solve_halfLength(refined_points)
 
