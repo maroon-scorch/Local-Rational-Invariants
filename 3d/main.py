@@ -325,7 +325,7 @@ def solve_half_length(points):
     grid_list.append(grid_edge_list[-1][1])
     
     return grid_list
-    
+   
 # --------------------------------------------------------
 #               Main Operation
 # --------------------------------------------------------
