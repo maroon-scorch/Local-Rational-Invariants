@@ -166,3 +166,7 @@ def visualize_edges(grid_edge_list):
         plt.plot([start.x, end.x], [start.y, end.y], 'k-')
         # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
     plt.show()
+    
+# https://stackoverflow.com/questions/3460161/remove-adjacent-duplicate-elements-from-a-list
+def remove_adjacent(nums):
+     return [a for a,b in zip(nums, nums[1:]+[not nums[-1]]) if a != b]
