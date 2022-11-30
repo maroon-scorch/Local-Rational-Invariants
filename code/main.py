@@ -309,65 +309,15 @@ def side(points, pt):
     return odd
 
 
-#---------------------------------------------------------
-#               Euler Characteristic for Curves
-#---------------------------------------------------------
 
-def count_v(intersect, pt):
-    """Count the degree of intersection"""
-    count = 0
-    for v in intersect:
-        if (pt == v):
-            count = count + 1
-    return count
-
-def type_v(points):
-    """Given a list of points, output a list of pairs with each vertex labelled 
-    by its degree of intersection(vertex type)"""
-    intersect = find_intersection(points)
-    for pt in points:
-        label_points = []
-        if pt in intersect: #intersecting vertices
-            count_pt = count_v(intersect, pt)
-            label_points.append([count_pt, pt])
-            return label_points
-        else:
-            label_points.append([0, pt])
-            return label_points
         
-def value_v(points):
-    """Given a list of points, output a list of pairs with each vertex labelled 
-    by its assigned value"""
-    label_points = type_v(points)
-    value_points = []
-    if points[0] == points[-1]: #closed
-            for pair in label_points:
-                if pair[0] == 0:
-                    value_points.append(pair)
-                else:
-                    value_points.append([-pair[0], pair[1]])
-                   
-def euler_curve(points):
-    """Given a polygonal curve defined by a list of points, find its Euler Characteristic"""
-    intersect = find_intersection(points)
-    if intersect == []: #embedded curve
-        if points[0] != points[-1]: #open
-            return 1
-        else: 
-            return 0
-    else: #Imbedded
-        chi = 1
-        for pt in points:
-            if pt in intersect: #intersecting vertices
-                count_pt = count_v(intersect, pt)
-                chi = chi - count_pt
-        return chi
+        
+        
+            
+        
     
-#---------------------------------------------------------
-#               Euler Characteristic for Surfaces
-#---------------------------------------------------------
-
-
+    
+    
     
 
 # --------------------------------------------------------

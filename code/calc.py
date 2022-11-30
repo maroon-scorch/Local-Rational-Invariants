@@ -1,6 +1,6 @@
 import sys, itertools
 from copy import copy, deepcopy
-from main import intersection_point, is_crossing_stable, run
+from main import intersection_point, is_crossing_stable, run, euler_curve
 from data.point import *
 from util import *
 # from projection import *
@@ -87,12 +87,13 @@ def process_solution(solution):
     # print(len(count_list))    
     return count_list
 
-def pretty_print(count_list):
+def pretty_print(count_list, solution):
     string = ""
     for idx, count in count_list:
         item = str(count) + "*x_" + idx + " + "
         string += item
-    string += " 0 = 2"
+    # string += " 0 = " + str(euler_curve(solution))
+    string += " 0 = 0"
     return string
     
     
@@ -101,6 +102,7 @@ def pretty_print(count_list):
 # visualize(points, "Title", True)
 
 polynomial_list = []
+solution_list = []
 for i in range(20):
     a = random.randint(1, 10)
     b = random.randint(1, 10)
@@ -110,10 +112,11 @@ for i in range(20):
     solution = run(points, 2, False)
     count_list = process_solution(solution)
     polynomial_list.append(count_list)
+    solution_list.append(solution)
     
 print("-------------------------------------------------------------")
-for c_lst in polynomial_list:
-    print(pretty_print(c_lst))
+for idx, c_list in enumerate(polynomial_list):
+    print(pretty_print(c_list, solution_list[idx]))
 # print(vertex_dict)
 
 # visualize(solution, "Refined Input", False)
