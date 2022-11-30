@@ -15,8 +15,6 @@ max_range = 200/180*math.pi
 def custom_cuve(curve_x, curve_y, start, stop, num_points, scale):
     # Given a parameterized function for a curve, produces its polygonal approximation
     samples = np.linspace(start, stop, num=num_points).tolist()
-    print(samples)
-    
     points = []
     for t in samples:
         current_x = round(scale*curve_x(t))
@@ -30,9 +28,10 @@ def parse_solution(vertices):
     for idx, vert in enumerate(vertices):
         if idx != len(vertices) - 1:
             item = (vert, [vertices[idx - 1], vertices[idx + 1]])
+            adj_list.append(item)
         else:
             item = (vert, [vertices[idx - 1], vertices[0]])
-        adj_list.append(item)
+            adj_list.append(item)
     return adj_list
 
 def scuffed_index(vec):
@@ -77,8 +76,8 @@ def label_vertex(adj_list):
     for vert, neighbor in adj_list:
         n0 = neighbor[0]
         n1 = neighbor[1]
-        # label_v = label_this_vertex_ignore(n0, n1, vert)
-        label_v = label_this_vertex_order(n0, n1, vert)
+        label_v = label_this_vertex_ignore(n0, n1, vert)
+        # label_v = label_this_vertex_order(n0, n1, vert)
         
         if vertex_dict.get(label_v) == None:
             vertex_dict[label_v] = [vert]
@@ -103,29 +102,46 @@ def pretty_print(count_list, points):
     for idx, count in count_list:
         item = str(count) + "*x_" + idx + " + "
         string += item
-    num = turning_number(points)
+    num = 0
+    # num = turning_number(points)
     string += "0 == "
-    string += (str(num) + "\n")
+    string += (str(num) + ",\n")
     return string
-    
+
+def rotate(f_x, f_y, theta):
+    t_x = lambda t: f_x(t)*math.cos(theta) - f_y(t)*math.sin(theta)
+    t_y = lambda t: f_x(t)*math.sin(theta) + f_y(t)*math.cos(theta)
+    return t_x, t_y
     
 # points = generate_curve(-10, 10, 10, 2)
 # # points = getpts(-10, 10, 3)
 # visualize(points, "Title", True)
 if __name__ == "__main__":
+    
     polynomial_list = []
     parameter_list = []
-    for i in range(20):
-        a = random.randint(-10, -1)
-        b = random.randint(1, 10)
-        f_x = lambda t: math.cos(t)
-        f_y = lambda t: math.sin(t)
-        parameter_list.append((a, b))
-        points = custom_cuve(f_x, f_y, 0, 10*math.pi, 1000, 30)
-        solution = run(points, 2, False)
-        count_list = process_solution(solution)
-        polynomial_list.append([count_list, solution])
+    grid_curve_list = []
+    for i in range(10):
+        a = random.randint(-5, -1)
+        b = random.randint(1, 5)
+        f_x = lambda t: math.cos(a*t)
+        f_y = lambda t: math.sin(b*t)
+        f1_x, f1_y = rotate(f_x, f_y, math.pi/2)
+        f2_x, f2_y = rotate(f_x, f_y, math.pi)
+        f3_x, f3_y = rotate(f_x, f_y, 3*math.pi/2)
         
+        functions_list = [(f_x, f_y, (a, b)), (f1_x, f1_y, (a, b)), (f2_x, f2_y, (a, b)), (f3_x, f3_y, (a, b))]
+        
+        for x, y, param in functions_list:
+            parameter_list.append(param)
+            points = custom_cuve(x, y, 0, 2*math.pi, 100, 30)
+            solution = run(points, 2, False)
+            grid_curve_list.append(solution)
+        
+        for curve in grid_curve_list:
+            count_list = process_solution(curve)
+            polynomial_list.append([count_list, curve])
+
     print("-------------------------------------------------------------")
     with open('poly.txt', 'w') as f:
         for c_lst, solution in polynomial_list:
@@ -133,7 +149,3 @@ if __name__ == "__main__":
             f.write(txt)
         for p in parameter_list:
             f.write(str(p) + "\n")
-
-# print(vertex_dict)
-
-# visualize(solution, "Refined Input", False)

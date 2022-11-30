@@ -189,26 +189,7 @@ def solve_project(points):
     
     return grid_list
 
-def solve_half_length(points):
-    grid_edge_list = []
-    edge_list = vert_to_edges_open(points)
-
-    for edge in edge_list:
-        current_p1 = edge[0]
-        current_p2 = edge[1]
-
-        mid_x_1 = (math.floor(current_p1.x) + math.ceil(current_p1.x))/2
-        mid_y_1 = (math.floor(current_p1.y) + math.ceil(current_p1.y))/2
-        mid_x_2 = (math.floor(current_p2.x) + math.ceil(current_p2.x))/2
-        mid_y_2 = (math.floor(current_p2.y) + math.ceil(current_p2.y))/2
-
-        midpoint = Point((current_p1.x + current_p2.x)/2, (current_p1.y + current_p2.y)/2)
-        c1, _, _, c1_op = grid_points(midpoint)
-        center = Point((c1.x + c1_op.x)/2, (c1.y + c1_op.y)/2)
-
-        grid_edge_list.append([Point(mid_x_1, mid_y_1), center])
-        grid_edge_list.append([center, Point(mid_x_2, mid_y_2)])
-
+def remove_edges(grid_edge_list):
     faulty_edge_list = []
     for idx, ed_1 in enumerate(grid_edge_list):
         if idx != len(grid_edge_list) - 1:
@@ -226,6 +207,32 @@ def solve_half_length(points):
     
     for i in faulty_edge_list:
         grid_edge_list.pop(i)
+        
+    return faulty_edge_list
+
+def solve_half_length(points):
+    grid_edge_list = []
+    edge_list = vert_to_edges_open(points)
+    
+    for edge in edge_list:
+        current_p1 = edge[0]
+        current_p2 = edge[1]
+
+        mid_x_1 = (math.floor(current_p1.x) + math.ceil(current_p1.x))/2
+        mid_y_1 = (math.floor(current_p1.y) + math.ceil(current_p1.y))/2
+        mid_x_2 = (math.floor(current_p2.x) + math.ceil(current_p2.x))/2
+        mid_y_2 = (math.floor(current_p2.y) + math.ceil(current_p2.y))/2
+
+        midpoint = Point((current_p1.x + current_p2.x)/2, (current_p1.y + current_p2.y)/2)
+        c1, _, _, c1_op = grid_points(midpoint)
+        center = Point((c1.x + c1_op.x)/2, (c1.y + c1_op.y)/2)
+
+        grid_edge_list.append([Point(mid_x_1, mid_y_1), center])
+        grid_edge_list.append([center, Point(mid_x_2, mid_y_2)])
+        
+    faulty_edge_list = remove_edges(grid_edge_list)
+    while faulty_edge_list != []:
+        faulty_edge_list = remove_edges(grid_edge_list)
 
     # for i, ed in enumerate(grid_edge_list):
     #     print(str(i) + ": " + str(ed))

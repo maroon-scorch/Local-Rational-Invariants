@@ -19,6 +19,7 @@ class Point:
     def __eq__(self, other):
         if type(other) != Point:
             return False
+        # return approx_equal(self, other)
         return self.x == other.x and self.y == other.y
 
     def __hash__(self):
@@ -53,6 +54,9 @@ def approx_contains(lst, point):
             return True
         
     return False
+
+def approx_equal(p1, p2):
+    return dist(p1, p2) < 0.000001
 
 def to_sp(pt):
     return sp.Point(pt.x, pt.y)
