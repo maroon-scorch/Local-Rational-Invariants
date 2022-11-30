@@ -124,12 +124,34 @@ def face_center_to_cube_center(c1, c2):
     
     return center
 
+def is_square(v1, v2, v3, v4):
+    standard = [1/2, 1/2, math.sqrt(2)/2]
+    dl1 = [dist(v1, v2), dist(v1, v3), dist(v1, v4)]
+    dl1.sort()
+    
+    dl2 = [dist(v2, v1), dist(v2, v3), dist(v2, v4)]
+    dl2.sort()
+    
+    dl3 = [dist(v3, v1), dist(v3, v2), dist(v3, v4)]
+    dl3.sort()
+    
+    dl4 = [dist(v4, v1), dist(v4, v2), dist(v4, v3)]
+    dl4.sort()
+    
+    return dl1 == standard and dl2 == standard and dl3 == standard and dl4 == standard
+    
+
 def intersection_to_squares(intersection):
     """ Given a list of intersections contained in a unit voxel,
     convert it to a cubical approximation (roughly) """
+    
+    if intersection == []:
+        return []
+    
     cube_list = []
     edge_list = []
     center_list = []
+    square_list = []
     for p1, p2 in itertools.combinations(intersection,2):
         c1, c2, c3 = midpoint_face(p1, p2)
         cube_list.append(c1)
@@ -143,17 +165,31 @@ def intersection_to_squares(intersection):
     cube_list = list(set(cube_list))
     center_list = list(set(center_list))
     print(cube_list)
-    visualize_edges(edge_list)
+    # visualize_edges(edge_list)
     
+    # This is a list of vertices of the cubical faces
     cube_list.append(face_center_to_cube_center(center_list[0], center_list[1]))
     
-    return cube_list
+    for v1, v2, v3, v4 in itertools.combinations(cube_list, 4):
+        if is_square(v1, v2, v3, v4):
+            # Scuffed swap
+            new_sq = [v1, v2, v3, v4]
+            new_sq.sort(key=lambda p: dist(v1, p))
+            temp = new_sq[2]
+            new_sq[2] = new_sq[3]
+            new_sq[3] = temp      
+            ns = Square(new_sq[0], new_sq[1], new_sq[2], new_sq[3])
+            print(ns)      
+            square_list.append(ns)
+    
+    
+    return square_list
         
 
 def run():
     tri_lst = [Trig(Point3(0, 0, 0), Point3(0, 0, 5), Point3(0, 5, 0))]
     triangle_to_voxel(tri_lst)
-    sq_lst = [Square(Point3(0, 0, 0), Point3(0, 0, 1), Point3(0, 1, 1), Point3(0, 1, 0))]
+    sq_lst = [Square(Point3(0, 0, 0), Point3(0, 0, 1), Point3(0, 1, 1), Point3(0, 1, 0)), Square(Point3(0, 0, 0), Point3(0, 0, -1), Point3(0, -1, -1), Point3(0, -1, 0))]
     square_to_voxel(sq_lst)
 
 # https://stackoverflow.com/questions/4622057/plotting-3d-polygons-in-python-matplotlib
@@ -162,7 +198,7 @@ if __name__ == "__main__":
     input = [Point3(0, 0, 0.3), Point3(0, 0.3, 0), Point3(0.3, 0, 0)]
     plot_points(input)
     output = intersection_to_squares(input)
-    plot_points(output)
+    square_to_voxel(output)
     
     # run()
 
