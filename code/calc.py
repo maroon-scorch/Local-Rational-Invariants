@@ -116,12 +116,12 @@ if __name__ == "__main__":
     polynomial_list = []
     parameter_list = []
     for i in range(20):
-        a = random.randint(1, 10)
+        a = random.randint(-10, -1)
         b = random.randint(1, 10)
-        f_x = lambda t: math.cos(a*t)
-        f_y = lambda t: math.sin(b*t)
+        f_x = lambda t: math.cos(t)
+        f_y = lambda t: math.sin(t)
         parameter_list.append((a, b))
-        points = custom_cuve(f_x, f_y, 0, -2*math.pi, 100, 30)
+        points = custom_cuve(f_x, f_y, 0, 10*math.pi, 1000, 30)
         solution = run(points, 2, False)
         count_list = process_solution(solution)
         polynomial_list.append([count_list, solution])

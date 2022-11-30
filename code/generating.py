@@ -168,7 +168,7 @@ if __name__ == "__main__":
     # visualize(points, "Title", True)
       
     f_x = lambda t: math.cos(t)
-    f_y = lambda t: 5*math.sin(t)
+    f_y = lambda t: math.sin(t)
     # theta = math.pi/4
     # t_x = lambda t: f_x(t)*math.cos(theta) - f_y(t)*math.sin(theta)
     # t_y = lambda t: f_x(t)*math.sin(theta) + f_y(t)*math.cos(theta)
