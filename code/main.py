@@ -223,8 +223,6 @@ def is_stable(points, index):
     point_2 = Point(intersection.x - epsilon, intersection.y)
     point_3 = Point(intersection.x, intersection.y  + epsilon)
     point_4 = Point(intersection.x, intersection.y  - epsilon)
-    
-    print(point_1)
         
     for idx in [index]:
         duplicate_1[idx] = point_1
@@ -280,7 +278,6 @@ def is_stable_alt(points, index):
     
     for seg_1, seg_2 in list(itertools.combinations(triple_list,2)):
         # if at least one crossing is stable, the entire point is stable
-        print("dfaf")
         print(seg_1)
         print(seg_2)
         if is_crossing_stable(seg_1, seg_2):
@@ -308,16 +305,85 @@ def side(points, pt):
         j = i
     return odd
 
+def count_v(intersect, pt):
+    """Count the degree of intersection"""
+    count = 0
+    for v in intersect:
+        if (pt == v):
+            count = count + 1
+    return count
 
+def type_v(points):
+    """Given a list of points, output a list of pairs with each vertex labelled 
+    by its degree of intersection(vertex type)"""
+    intersect = find_intersection(points)
+    for pt in points:
+        label_points = []
+        if pt in intersect: #intersecting vertices
+            count_pt = count_v(intersect, pt)
+            label_points.append([count_pt, pt])
+            return label_points
+        else:
+            label_points.append([0, pt])
+            return label_points
+        
+def value_v(points):
+    """Given a list of points, output a list of pairs with each vertex labelled 
+    by its assigned value"""
+    label_points = type_v(points)
+    value_points = []
+    if points[0] == points[-1]: #closed
+            for pair in label_points:
+                if pair[0] == 0:
+                    value_points.append(pair)
+                else:
+                    value_points.append([-pair[0], pair[1]])
+                   
+def euler_curve(points):
+    """Given a polygonal curve defined by a list of points, find its Euler Characteristic"""
+    intersect = find_intersection(points)
+    if intersect == []: #embedded curve
+        if points[0] != points[-1]: #open
+            return 1
+        else: 
+            return 0
+    else: #Imbedded
+        chi = 1
+        for pt in points:
+            if pt in intersect: #intersecting vertices
+                count_pt = count_v(intersect, pt)
+                chi = chi - count_pt
+        return chi
 
-        
-        
-        
-            
-        
+#---------------------------------------------------------
+#               Turning Number for Curves
+#---------------------------------------------------------
+ 
+def turning_number(points):
+    ang_list = []
+    for idx, pt in enumerate(points):
+        if idx < len(points) - 2:
+            ang_list.append([pt, points[idx + 1], points[idx + 2]])
     
+    ang_list.append([points[-2], points[-1], points[0]])
+    ang_list.append([points[-1], points[0], points[1]])
     
-    
+    number = 0
+    for triple in ang_list:
+        ang = angle(triple[0], triple[1], triple[2])
+        if ang != math.pi: # isn't a striaght line
+            vec_1 = triple[1].vec - triple[0].vec
+            vec_2 = triple[2].vec - triple[1].vec
+            if vec_1[0] * vec_2[1] - vec_1[1] * vec_2[0] > 0:
+                number += 0.25
+            else:
+                number -= 0.25
+    return number
+ 
+#---------------------------------------------------------
+#               Euler Characteristic for Surfaces
+#---------------------------------------------------------
+
     
 
 # --------------------------------------------------------
@@ -360,9 +426,10 @@ def run(points, dimension, close):
     # solution = solve_project(refined_points)
     # visualize(solution, "Grid Approximation", False)
     solution = solve_half_length(refined_points)
-    solution = scale_input(solution, 2)
-    return solution
+    solution = remove_adjacent(scale_input(solution, 2))
     # visualize(solution, "Title", False)
+    return solution
+    
     # solution = solve_halfLength(refined_points)
 
 

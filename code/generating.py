@@ -1,6 +1,6 @@
 import sys, itertools
 from copy import copy, deepcopy
-from main import intersection_point, is_crossing_stable, run
+from main import intersection_point, is_crossing_stable, run, turning_number
 from data.point import *
 from util import *
 # from projection import *
@@ -162,14 +162,18 @@ def custom_cuve(curve_x, curve_y, start, stop, num_points, scale):
         
     return points
 
-points = generate_curve(-10, 10, 10, 2)
-# points = getpts(-10, 10, 3)
-visualize(points, "Title", True)
+if __name__ == "__main__":
+    # points = generate_curve(-10, 10, 10, 2)
+    # points = getpts(-10, 10, 3)
+    # visualize(points, "Title", True)
       
-# f_x = lambda t: math.cos(t)
-# f_y = lambda t: math.sin(2*t)
-# theta = math.pi/4
-# t_x = lambda t: f_x(t)*math.cos(theta) - f_y(t)*math.sin(theta)
-# t_y = lambda t: f_x(t)*math.sin(theta) + f_y(t)*math.cos(theta)
-# points = custom_cuve(t_x, t_y, 0, 2*math.pi, 100, 30)
-# run(points, 2, False)
+    f_x = lambda t: math.cos(t)
+    f_y = lambda t: math.sin(t)
+    # theta = math.pi/4
+    # t_x = lambda t: f_x(t)*math.cos(theta) - f_y(t)*math.sin(theta)
+    # t_y = lambda t: f_x(t)*math.sin(theta) + f_y(t)*math.cos(theta)
+    points = custom_cuve(f_x, f_y, 0, 4*math.pi, 100, 30)
+    visualize(points, "Title", True)
+    solution = run(points, 2, False)
+    visualize(solution, "Title", True)
+    # print(turning_number(solution))

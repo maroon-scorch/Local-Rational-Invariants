@@ -1,6 +1,6 @@
 import sys, itertools
 from copy import copy, deepcopy
-from main import intersection_point, is_crossing_stable, run, euler_curve
+from main import intersection_point, is_crossing_stable, run, turning_number
 from data.point import *
 from util import *
 # from projection import *
@@ -46,9 +46,11 @@ def scuffed_index(vec):
     elif lst == [-1, 0]:
         return 4
     else:
+        print(lst)
+        print("QQQQQQQQQQQQQQQQQQQQQQ")
         return 0
 
-def label_this_vertex(start, end, vertex):
+def label_this_vertex_ignore(start, end, vertex):
     vec_1 = start.vec - vertex.vec
     vec_2 = end.vec - vertex.vec
     ind_1 = scuffed_index(vec_1)
@@ -61,13 +63,22 @@ def label_this_vertex(start, end, vertex):
     
     return index
 
+def label_this_vertex_order(start, end, vertex):
+    vec_1 = start.vec - vertex.vec
+    vec_2 = end.vec - vertex.vec
+    ind_1 = scuffed_index(vec_1)
+    ind_2 = scuffed_index(vec_2)
+    index = str(ind_1) + str(ind_2)
+    
+    return index
 
 def label_vertex(adj_list):
     vertex_dict = {}
     for vert, neighbor in adj_list:
         n0 = neighbor[0]
         n1 = neighbor[1]
-        label_v = label_this_vertex(n0, n1, vert)
+        # label_v = label_this_vertex_ignore(n0, n1, vert)
+        label_v = label_this_vertex_order(n0, n1, vert)
         
         if vertex_dict.get(label_v) == None:
             vertex_dict[label_v] = [vert]
@@ -87,36 +98,42 @@ def process_solution(solution):
     # print(len(count_list))    
     return count_list
 
-def pretty_print(count_list, solution):
+def pretty_print(count_list, points):
     string = ""
     for idx, count in count_list:
         item = str(count) + "*x_" + idx + " + "
         string += item
-    # string += " 0 = " + str(euler_curve(solution))
-    string += " 0 = 0"
+    num = turning_number(points)
+    string += "0 == "
+    string += (str(num) + "\n")
     return string
     
     
 # points = generate_curve(-10, 10, 10, 2)
 # # points = getpts(-10, 10, 3)
 # visualize(points, "Title", True)
+if __name__ == "__main__":
+    polynomial_list = []
+    parameter_list = []
+    for i in range(20):
+        a = random.randint(-10, -1)
+        b = random.randint(1, 10)
+        f_x = lambda t: math.cos(t)
+        f_y = lambda t: math.sin(t)
+        parameter_list.append((a, b))
+        points = custom_cuve(f_x, f_y, 0, 10*math.pi, 1000, 30)
+        solution = run(points, 2, False)
+        count_list = process_solution(solution)
+        polynomial_list.append([count_list, solution])
+        
+    print("-------------------------------------------------------------")
+    with open('poly.txt', 'w') as f:
+        for c_lst, solution in polynomial_list:
+            txt = pretty_print(c_lst, solution)
+            f.write(txt)
+        for p in parameter_list:
+            f.write(str(p) + "\n")
 
-polynomial_list = []
-solution_list = []
-for i in range(20):
-    a = random.randint(1, 10)
-    b = random.randint(1, 10)
-    f_x = lambda t: math.cos(a*t)
-    f_y = lambda t: math.sin(b*t)
-    points = custom_cuve(f_x, f_y, 0, 2*math.pi, 100, 30)
-    solution = run(points, 2, False)
-    count_list = process_solution(solution)
-    polynomial_list.append(count_list)
-    solution_list.append(solution)
-    
-print("-------------------------------------------------------------")
-for idx, c_list in enumerate(polynomial_list):
-    print(pretty_print(c_list, solution_list[idx]))
 # print(vertex_dict)
 
 # visualize(solution, "Refined Input", False)

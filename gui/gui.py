@@ -6,6 +6,7 @@ sys.path.insert(1, '../code')
 from data.point import Point
 from main import run
 from util import closest_grid_point
+from calc import *
 
 win=Tk()
 
@@ -69,7 +70,11 @@ def clickRunButton():
         file.write(line)
     
     win.destroy()
-    run(point_list, 2)
+    solution = run(point_list, 2, False)
+    count_list = process_solution(solution)
+    txt = pretty_print(c_lst)
+    print(txt)
+    
 
 clearButton = Button(text="Clear", command= clickClearButton)
 clearButton.place(x=0, y=450)
