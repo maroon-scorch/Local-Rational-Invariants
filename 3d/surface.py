@@ -166,7 +166,7 @@ def intersection_to_squares(intersection):
         
     cube_list = list(set(cube_list))
     center_list = list(set(center_list))
-    print(cube_list)
+    # print(cube_list)
     # visualize_edges(edge_list)
     
     # This is a list of vertices of the cubical faces
@@ -181,7 +181,7 @@ def intersection_to_squares(intersection):
             new_sq[2] = new_sq[3]
             new_sq[3] = temp      
             ns = Square(new_sq[0], new_sq[1], new_sq[2], new_sq[3])
-            print(ns)      
+            # print(ns)      
             square_list.append(ns)
     
     
