@@ -58,6 +58,7 @@ def square_to_voxel(square_list):
     for sq in square_list:
         vtx = np.array([sq.p1.vec, sq.p2.vec, sq.p3.vec, sq.p4.vec])
         tri = a3.art3d.Poly3DCollection([vtx])
+        tri.set_alpha(0.5)
         ax.scatter(sq.p1.x, sq.p1.y, sq.p1.z, c = '#FF0000')
         ax.scatter(sq.p2.x, sq.p2.y, sq.p2.z, c = '#FF0000')
         ax.scatter(sq.p3.x, sq.p3.y, sq.p3.z, c = '#FF0000')
@@ -71,12 +72,13 @@ def triangle_to_voxel(trig_list):
     for sq in trig_list:
         vtx = np.array([sq.p1.vec, sq.p2.vec, sq.p3.vec])
         tri = a3.art3d.Poly3DCollection([vtx])
-        # tri.set_opacity(0.7)
+        tri.set_alpha(0.5)
         # tri.set_color(colors.rgb2hex(np.random.rand(3)))
-        tri.set_edgecolor('k')
+        
         ax.scatter(sq.p1.x, sq.p1.y, sq.p1.z, c = '#FF0000')
         ax.scatter(sq.p2.x, sq.p2.y, sq.p2.z, c = '#FF0000')
         ax.scatter(sq.p3.x, sq.p3.y, sq.p3.z, c = '#FF0000')
+        tri.set_edgecolor('k')
         ax.add_collection3d(tri)
     plt.show()
     
@@ -187,7 +189,9 @@ def intersection_to_squares(intersection):
         
 
 def run():
-    tri_lst = [Trig(Point3(0, 0, 0), Point3(0, 0, 5), Point3(0, 5, 0))]
+    tri_lst = [Trig(Point3(0, 0, 0), Point3(0, 0, 5), Point3(0, 5, 0)), 
+               Trig(Point3(2.323823790216319, 0.0, 1.09106980242110), Point3(2.4567710601398276, 0.3167655508732572, 1.29645679061558)
+               , Point3(2.4771080832617316, 0.0, 1.29645679061558))]
     triangle_to_voxel(tri_lst)
     sq_lst = [Square(Point3(0, 0, 0), Point3(0, 0, 1), Point3(0, 1, 1), Point3(0, 1, 0)), Square(Point3(0, 0, 0), Point3(0, 0, -1), Point3(0, -1, -1), Point3(0, -1, 0))]
     square_to_voxel(sq_lst)
@@ -195,12 +199,12 @@ def run():
 # https://stackoverflow.com/questions/4622057/plotting-3d-polygons-in-python-matplotlib
 # The main body of the code:
 if __name__ == "__main__":
-    input = [Point3(0, 0, 0.3), Point3(0, 0.3, 0), Point3(0.3, 0, 0)]
-    plot_points(input)
-    output = intersection_to_squares(input)
-    square_to_voxel(output)
+    # input = [Point3(0, 0, 0.3), Point3(0, 0.3, 0), Point3(0.3, 0, 0)]
+    # plot_points(input)
+    # output = intersection_to_squares(input)
+    # square_to_voxel(output)
     
-    # run()
+    run()
 
 # n_radii = 8
 # n_angles = 36
