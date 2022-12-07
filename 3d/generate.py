@@ -36,12 +36,20 @@ def plot_points(point_list):
         ax.scatter(pt.x, pt.y, pt.z, c = '#FF0000')
     plt.show()
 
+def custom_round(x):
+    z = round(x)
+    left = z - 0.5
+    right = z + 0.5
+    return left if abs(x - left) < abs(x - right) else right
+    
+    
 # Given two numbers x, y, find the integers between them inclusive
 def int_between(x, y):
+    print(x, y)
     if x < y:
-        return range(math.ceil(x), math.floor(y) + 1)
+        return custom_round(x), custom_round(y)
     else:
-        return range(math.ceil(y), math.floor(x) + 1)
+        return custom_round(y), custom_round(x)
 
 def visualize_surface(x, y, z):
     fig = plt.figure()
@@ -52,14 +60,14 @@ def visualize_surface(x, y, z):
 
     plt.show()
     
-def lst_to_mid(lst):
-    edges = []
-    for idx, point in enumerate(lst):
-        if idx != len(lst) - 1:
-            edges.append([point, lst[idx + 1]])
+def lst_to_mid(start, end):
+    current = start
     mid = []
-    for s, e in edges:
-        mid.append((s + e)/2)
+    while current < end:
+        mid.append(current)
+        current += 1
+    mid.append(current)
+    
     return mid
 
 def tetrahedron_volume(a, b, c, d):
@@ -86,7 +94,7 @@ def is_point_on_triangle(trg, pt):
     A = triangle_area(a, b, c)
     A1, A2, A3 = triangle_area(a, b, pt), triangle_area(a, c, pt), triangle_area(b, c, pt)
     
-    return abs(A - (A1 + A2 + A3)) < 0.0000000001
+    return abs(A - (A1 + A2 + A3)) < 0.00001
 
 def is_triangle_degenrate(trg):
     a, b, c = trg.p1, trg.p2, trg.p3
@@ -165,7 +173,7 @@ def find_intersection(mesh_triangles, center):
         p_e = Point3(end[0], end[1], end[2])
         if abs(dist(p_s, p_e) - 1) < 0.0000001:
             line_list.append([p_s, p_e])
-
+    
     for line_start, line_end in line_list:
         for trig in mesh_triangles:
             has_points, point = segment_cross_triangle(trig, line_start, line_end)
@@ -175,11 +183,32 @@ def find_intersection(mesh_triangles, center):
     point_list = list(set(point_list))
     return point_list
 
+def find_edges(center):
+    line_list = []
+    x, y, z = center.x, center.y, center.z
+    x_min, x_max = int(math.floor(x)), int(math.ceil(x))
+    y_min, y_max = int(math.floor(y)), int(math.ceil(y))
+    z_min, z_max = int(math.floor(z)), int(math.ceil(z))
+    
+    axes = [
+        [x_min, x_max],
+        [y_min, y_max],
+        [z_min, z_max]
+    ]
+    
+    vertices = itertools.product(*axes)
+    for start, end in itertools.combinations(vertices, 2):
+        p_s = Point3(start[0], start[1], start[2])
+        p_e = Point3(end[0], end[1], end[2])
+        if abs(dist(p_s, p_e) - 1) < 0.0000001:
+            line_list.append([p_s, p_e])
+    return line_list
+
 def generate_torus():
-    R = 4
-    r = 2
-    u = np.linspace(0, 2 * np.pi, 30)
-    v = np.linspace(0, 2*np.pi, 30)
+    R = 1.9
+    r = 0.7
+    u = np.linspace(0, 2 * np.pi, 25)
+    v = np.linspace(0, 2*np.pi, 25)
     # p: u, v
     f_x = lambda p: (R + r*math.cos(p[0]))*math.cos(p[1])
     f_y = lambda p: (R + r*math.cos(p[0]))*math.sin(p[1])
@@ -203,7 +232,7 @@ def generate_torus():
     return mesh_3d
 
 def generate_mesh():
-    r = 2.5
+    r = 1.9
     u = np.linspace(0, 2*np.pi, 20)
     v = np.linspace(0, np.pi, 20)
     
@@ -229,6 +258,31 @@ def generate_mesh():
                                      Point3(f_x(trig[2]), f_y(trig[2]), f_z(trig[2]))], mesh))
     return mesh_3d
 
+def debug_plot(trig_list, point_list, center):
+    ax = a3.Axes3D(plt.figure())
+    for sq in trig_list:
+        vtx = np.array([sq.p1.vec, sq.p2.vec, sq.p3.vec])
+        tri = a3.art3d.Poly3DCollection([vtx])
+        tri.set_alpha(0.5)
+        # tri.set_color(colors.rgb2hex(np.random.rand(3)))
+        
+        # ax.scatter(sq.p1.x, sq.p1.y, sq.p1.z, c = '#FF0000')
+        # ax.scatter(sq.p2.x, sq.p2.y, sq.p2.z, c = '#FF0000')
+        # ax.scatter(sq.p3.x, sq.p3.y, sq.p3.z, c = '#FF0000')
+        tri.set_edgecolor('k')
+        ax.add_collection3d(tri)
+        
+    for pt in point_list:
+        ax.scatter(pt.x, pt.y, pt.z, c = '#00FF00')
+    for pt in center:
+        ax.scatter(pt.x, pt.y, pt.z, c = '#FF0000')
+        grid_edge_list = find_edges(pt)
+        for i, ed in enumerate(grid_edge_list):
+            start = ed[0]
+            end = ed[1]
+            ax.plot([start.x, end.x], [start.y, end.y], [start.z, end.z], 'k-')    
+    plt.show()
+
 if __name__ == "__main__":
     # Sphere
     # u = np.linspace(0, 2 * np.pi, 100)
@@ -239,7 +293,8 @@ if __name__ == "__main__":
 
     # Torus
 
-    mesh_3d = generate_mesh()
+    # mesh_3d = generate_mesh()
+    mesh_3d = generate_torus()
     m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
     mesh_triangles = []
     
@@ -252,18 +307,20 @@ if __name__ == "__main__":
     
     x_list = list(map(lambda trigs: [trigs.p1.x, trigs.p2.x, trigs.p3.x], mesh_triangles))
     x_list = np.array(x_list).flatten()
-    x_int = int_between(np.min(x_list), np.max(x_list))
-    x_cen = lst_to_mid(x_int)
+    x_start, x_end = int_between(np.min(x_list), np.max(x_list))
+    x_cen = lst_to_mid(x_start, x_end)
     
     y_list = list(map(lambda trigs: [trigs.p1.y, trigs.p2.y, trigs.p3.y], mesh_triangles))
     y_list = np.array(y_list).flatten()
-    y_int = int_between(np.min(y_list), np.max(y_list))
-    y_cen = lst_to_mid(y_int)
+    y_start, y_end = int_between(np.min(y_list), np.max(y_list))
+    y_cen = lst_to_mid(y_start, y_end)
     
     z_list = list(map(lambda trigs: [trigs.p1.z, trigs.p2.z, trigs.p3.z], mesh_triangles))
     z_list = np.array(z_list).flatten()
-    z_int = int_between(np.min(z_list), np.max(z_list))
-    z_cen = lst_to_mid(z_int)
+    z_start, z_end = int_between(np.min(z_list), np.max(z_list))
+    z_cen = lst_to_mid(z_start, z_end)
+    
+    print(x_cen, y_cen, z_cen)
     
     center = []
     for a in x_cen:
@@ -275,13 +332,19 @@ if __name__ == "__main__":
     print("---------------------- Good Luck ---------------------")
     # plot_points(center)
     sq_list = []
+    pts = []
     for c in center:
-        intersections = find_intersection(mesh_triangles, c)
-        squares = intersection_to_squares(intersections)
-        sq_list += squares
+        try:
+            intersections = find_intersection(mesh_triangles, c)
+            pts += intersections
+            squares = intersection_to_squares(intersections, c)
+            sq_list += squares
+        except Exception as e:
+            print(e)
     print("---------------------Finished Finding Squares----------")
     stop = timeit.default_timer()
-    print('Time: ', stop - start) 
+    print('Time: ', stop - start)
+    # debug_plot(mesh_triangles, pts, center)
     square_to_voxel(sq_list)
 
     

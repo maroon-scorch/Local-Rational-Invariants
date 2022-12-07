@@ -143,7 +143,7 @@ def is_square(v1, v2, v3, v4):
     return dl1 == standard and dl2 == standard and dl3 == standard and dl4 == standard
     
 
-def intersection_to_squares(intersection):
+def intersection_to_squares(intersection, center):
     """ Given a list of intersections contained in a unit voxel,
     convert it to a cubical approximation (roughly) """
     
@@ -170,7 +170,8 @@ def intersection_to_squares(intersection):
     # visualize_edges(edge_list)
     
     # This is a list of vertices of the cubical faces
-    cube_list.append(face_center_to_cube_center(center_list[0], center_list[1]))
+    cube_list.append(center)
+    # cube_list.append(face_center_to_cube_center(center_list[0], center_list[1]))
     
     for v1, v2, v3, v4 in itertools.combinations(cube_list, 4):
         if is_square(v1, v2, v3, v4):
