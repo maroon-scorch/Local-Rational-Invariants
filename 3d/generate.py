@@ -256,6 +256,42 @@ def generate_mesh():
     mesh_3d = list(map(lambda trig: [Point3(f_x(trig[0]), f_y(trig[0]), f_z(trig[0]))
                                      , Point3(f_x(trig[1]), f_y(trig[1]), f_z(trig[1])),
                                      Point3(f_x(trig[2]), f_y(trig[2]), f_z(trig[2]))], mesh))
+    # file2 = open(r"example.txt", "w+") 
+    # for tri in mesh_3d:
+    #     p1 = tri[0]
+    #     p2 = tri[1]
+    #     p3 = tri[2]
+    #     string = str(p1.x) + " " + str(p1.y) + " " +  str(p1.z)  + " " +  str(p2.x) + " " + str(p2.y) + " " + str(p2.z) + " " + str(p3.x) + " " + str(p3.y) + " " + str(p3.z)
+    #     file2.write(string + "\n")
+    # file2.close()
+    return mesh_3d
+
+def potato_chip():
+    a = 1
+    b = 2
+    u = np.linspace(-2, 2, 30)
+    v = np.linspace(-2, 2, 30)
+    
+    # p: u, v
+    f_x = lambda p: p[0]
+    f_y = lambda p: p[1]
+    f_z = lambda p: p[1]**2/a - p[0]**2/b + 0.1
+    px = []
+    py = []
+    for a in u:
+        for b in v:
+            px.append(a)
+            py.append(b)
+            
+    indices = Triangulation(px, py).triangles
+    
+    mesh = []
+    for i1, i2, i3 in indices:
+        mesh.append([(px[i1], py[i1]), (px[i2], py[i2]), (px[i3], py[i3])])
+    
+    mesh_3d = list(map(lambda trig: [Point3(f_x(trig[0]), f_y(trig[0]), f_z(trig[0]))
+                                     , Point3(f_x(trig[1]), f_y(trig[1]), f_z(trig[1])),
+                                     Point3(f_x(trig[2]), f_y(trig[2]), f_z(trig[2]))], mesh))
     return mesh_3d
 
 def debug_plot(trig_list, point_list, center):
@@ -283,28 +319,7 @@ def debug_plot(trig_list, point_list, center):
             ax.plot([start.x, end.x], [start.y, end.y], [start.z, end.z], 'k-')    
     plt.show()
 
-if __name__ == "__main__":
-    # Sphere
-    # u = np.linspace(0, 2 * np.pi, 100)
-    # v = np.linspace(0, np.pi, 100)
-    # x = 2.5 * np.outer(np.cos(u), np.sin(v))
-    # y = 2.5 * np.outer(np.sin(u), np.sin(v))
-    # z = 2.5 * np.outer(np.ones(np.size(u)), np.cos(v))
-
-    # Torus
-
-    # mesh_3d = generate_mesh()
-    mesh_3d = generate_torus()
-    m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
-    mesh_triangles = []
-    
-    for trg in m_triangles:
-        if not is_triangle_degenrate(trg):
-            mesh_triangles.append(trg)
-    
-    print("Number of Triangles: ", len(mesh_triangles))
-    triangle_to_voxel(mesh_triangles)
-    
+def solve(mesh_triangles):
     x_list = list(map(lambda trigs: [trigs.p1.x, trigs.p2.x, trigs.p3.x], mesh_triangles))
     x_list = np.array(x_list).flatten()
     x_start, x_end = int_between(np.min(x_list), np.max(x_list))
@@ -344,6 +359,41 @@ if __name__ == "__main__":
     print("---------------------Finished Finding Squares----------")
     stop = timeit.default_timer()
     print('Time: ', stop - start)
+    return sq_list
+
+if __name__ == "__main__":
+    # Sphere
+    # u = np.linspace(0, 2 * np.pi, 100)
+    # v = np.linspace(0, np.pi, 100)
+    # x = 2.5 * np.outer(np.cos(u), np.sin(v))
+    # y = 2.5 * np.outer(np.sin(u), np.sin(v))
+    # z = 2.5 * np.outer(np.ones(np.size(u)), np.cos(v))
+
+    # Torus
+
+    mesh_3d = generate_mesh()
+    # mesh_3d = generate_torus()
+    # mesh_3d = potato_chip()
+    m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
+    mesh_triangles = []
+    
+    for trg in m_triangles:
+        if not is_triangle_degenrate(trg):
+            mesh_triangles.append(trg)
+    
+    file2 = open(r"example.txt", "w+") 
+    for tri in mesh_triangles:
+        p1 = tri.p1
+        p2 = tri.p2
+        p3 = tri.p3
+        string = str(p1.x) + " " + str(p1.y) + " " +  str(p1.z)  + " " +  str(p2.x) + " " + str(p2.y) + " " + str(p2.z) + " " + str(p3.x) + " " + str(p3.y) + " " + str(p3.z)
+        file2.write(string + "\n")
+    file2.close()
+    
+    print("Number of Triangles: ", len(mesh_triangles))
+    triangle_to_voxel(mesh_triangles)
+    
+    sq_list = solve(mesh_triangles)
     # debug_plot(mesh_triangles, pts, center)
     square_to_voxel(sq_list)
 
