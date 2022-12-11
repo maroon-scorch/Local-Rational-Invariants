@@ -62,7 +62,7 @@ def directions(vec):
 
 def vert_link(vertex, squares):
     """ Finds the link of the vertex in the complex """
-    print("Vertex: ", vertex)
+    # print("Vertex: ", vertex)
     vert = vertex.vec
     # print(squares)
     
@@ -102,13 +102,13 @@ def vert_link(vertex, squares):
             vert_dict[key_e] = [end, start]
             
     vertices = [vert_dict[key][0] for key in vert_dict.keys()]
-    print("Number of Vertices ", len(vertices))
+    # print("Number of Vertices ", len(vertices))
     order = [directions(np.asarray(vert) - vertex.vec) for vert in vertices]
     # print(order)
     min_index = order.index(min(order))
     # print(min_index)
     min_vertex = vertices[min_index]
-    print("Start ", min_vertex)
+    # print("Start ", min_vertex)
     
     next = min_vertex
     path = [min_vertex]
@@ -130,8 +130,8 @@ def vert_link(vertex, squares):
     vec_path.append(np.asarray(path[0]) - np.asarray(path[-1]))
     # print(vec_path)
     order_path = [directions(elt) for elt in vec_path]
-    print(order_path)
-    print("-------------------------------------------")
+    # print(order_path)
+    # print("-------------------------------------------")
     
     # Visualizing Link of Vertex
     # ordered_link = []
@@ -143,6 +143,51 @@ def vert_link(vertex, squares):
     # visualize_edges_lst(ordered_link)
     
     return order_path
+
+def order_to_string(order_list):
+    output = ""
+    for o in order_list:
+        output += str(o)
+    return output
+
+def dict_to_polynomial(type_dict):
+    string = ""
+    variables = set()
+    for key in type_dict.keys():
+        item = str(type_dict[key]) + "*x_" + key + " + "
+        string += item
+        variables.add("x_" + key)
+    num = 0
+    # num = turning_number(points)
+    string += "0 == "
+    string += (str(2) + ",\n")
+    return string, variables
+
+def symmetrize_polynomials(variables):
+    polynomial_list = []
+    var = set()
+    for v in variables:
+        # print(v)
+        var_index = v[2:][::-1]
+        dual_variable = "x_"
+        for char in var_index:
+            c = int(char)
+            if c % 2 == 0:
+                dual_variable += str(c - 1)
+            else:
+                dual_variable += str(c + 1)
+        var.add(v)
+        var.add(dual_variable)
+        # print(dual_variable)
+        polynomial = v + " = " + dual_variable
+        polynomial_list.append(polynomial)
+    return polynomial_list, var
+
+def variables_to_sage(variables):
+    string = ""
+    for v in variables:
+        string += v + ", "
+    return string
 
 if __name__ == "__main__":
     input_file = sys.argv[1]
@@ -158,9 +203,22 @@ if __name__ == "__main__":
     vert_dict = {}
     for sq in squares:
         append_item(vert_dict, sq)
-        
+    
+    type_dict = {}
     for k in vert_dict.keys():
         head = vert_dict[k][0]
         body = vert_dict[k][1:]
-        vert_link(head, body)
+        order_list = vert_link(head, body)
+        vertex_type = order_to_string(order_list)
+        
+        if vertex_type in type_dict:
+            type_dict[vertex_type] += 1
+        else:
+            type_dict[vertex_type] = 1
     
+    polynomial, variables = dict_to_polynomial(type_dict)
+    print(polynomial)
+    print(variables)
+    print("-------------------------------")
+    polynomial_list, variables = symmetrize_polynomials(variables)
+    print(variables_to_sage(variables))
