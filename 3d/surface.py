@@ -18,6 +18,7 @@ class Square:
         self.p2 = p2
         self.p3 = p3
         self.p4 = p4
+        self.center = midpoint_of(p1, p3)
         self.lst = [p1, p2, p3, p4]
         # The String Representation of the value of the Literal
         self.value = str(self.lst)
@@ -115,6 +116,14 @@ def visualize_edges(grid_edge_list):
         end = ed[1]
         ax.plot([start.x, end.x], [start.y, end.y], [start.z, end.z], 'k-')
         # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
+    plt.show()
+    
+def visualize_edges_lst(grid_edge_list):
+    ax = plt.figure().add_subplot(projection='3d')
+    for i, ed in enumerate(grid_edge_list):
+        start = ed[0]
+        end = ed[1]
+        ax.plot([start[0], end[0]], [start[1], end[1]], [start[2], end[2]], 'k-')
     plt.show()
 
 def face_center_to_cube_center(c1, c2):

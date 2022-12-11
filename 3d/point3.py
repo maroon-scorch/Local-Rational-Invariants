@@ -28,6 +28,9 @@ class Point3:
     #     self.vec = np.array([new_x, new_y])
     #     self.value = "(" + str(self.x) + ", " + str(self.y) + ")"
 
+def scale_point3(pt, factor):
+    return Point3(pt.x*factor, pt.y*factor, pt.z*factor)
+
 def unit_vector(vector):
     """ Scales the vector to a unit vector """
     return vector / np.linalg.norm(vector)
