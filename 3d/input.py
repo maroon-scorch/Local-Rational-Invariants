@@ -179,7 +179,7 @@ def symmetrize_polynomials(variables):
         var.add(v)
         var.add(dual_variable)
         # print(dual_variable)
-        polynomial = v + " = " + dual_variable
+        polynomial = v + " == " + dual_variable
         polynomial_list.append(polynomial)
     return polynomial_list, var
 
@@ -221,4 +221,6 @@ if __name__ == "__main__":
     print(variables)
     print("-------------------------------")
     polynomial_list, variables = symmetrize_polynomials(variables)
+    for p in polynomial_list:
+        print(p)
     print(variables_to_sage(variables))
