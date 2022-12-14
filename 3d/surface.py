@@ -42,6 +42,14 @@ class Trig:
         self.lst = [p1, p2, p3]
         # The String Representation of the value of the Literal
         self.value = str(self.lst)
+        
+        # Find normal vector
+        plane_vec_1 = p2.vec - p1.vec
+        plane_vec_2 = p3.vec - p1.vec
+        self.normal = np.cross(plane_vec_1, plane_vec_2)
+
+        # Find area:
+        self.area = 1/2*abs(np.linalg.norm(self.normal))
 
     def __repr__(self):
         return str(self.lst)

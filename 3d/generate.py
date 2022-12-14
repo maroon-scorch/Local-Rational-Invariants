@@ -91,7 +91,7 @@ def is_point_on_triangle(trg, pt):
     # pt is coplanar with the tirangle
     a, b, c = trg.p1, trg.p2, trg.p3
     
-    A = triangle_area(a, b, c)
+    A = trg.area
     A1, A2, A3 = triangle_area(a, b, pt), triangle_area(a, c, pt), triangle_area(b, c, pt)
     
     return abs(A - (A1 + A2 + A3)) < 0.00001
@@ -130,51 +130,50 @@ def segment_cross_triangle(trg, start, end):
     else:
         # This has an intersection!
         diff = start.vec - end.vec
-        plane_vec_1 = b.vec - a.vec
-        plane_vec_2 = c.vec - a.vec
-        normal_vec = np.cross(plane_vec_1, plane_vec_2)
+        normal_vec = trg.normal
+        
+        # Optimization since we know this is a grid line:
+        temp = diff.tolist()
+        if temp[1] == 0 and temp[2] == 0:
+            x = (normal_vec[1]*(a.y - start.y) + normal_vec[2]*(a.z -start.z))/normal_vec[0] + a.x 
+            output = Point3(x, start.y, start.z)
+        elif temp[0] == 0 and temp[2] == 0:
+            y = (normal_vec[0]*(a.x - start.x) + normal_vec[2]*(a.z - start.z))/normal_vec[1] + a.y 
+            output = Point3(start.x, y, start.z)
+        elif temp[0] == 0 and temp[1] == 0:
+            z = (normal_vec[0]*(a.x - start.x) + normal_vec[1]*(a.y - start.y))/normal_vec[2] + a.z 
+            output = Point3(start.x, start.y, z)
+        else:
+            print("Shouldn't happen - same start and end")
+            return False, None
+        
+        if is_point_on_triangle(trg, output):
+            return True, output
+        else:
+            return False, output
         
         # Solving for time t where line crosses plane
-        sum = normal_vec[0]*a.x + normal_vec[1]*a.y + normal_vec[2]*a.z
-        start_sum = normal_vec[0]*start.x + normal_vec[1]*start.y + normal_vec[2]*start.z
-        diff_sum = normal_vec[0]*diff[0] + normal_vec[1]*diff[1] + normal_vec[2]*diff[2]
+        # sum = normal_vec[0]*a.x + normal_vec[1]*a.y + normal_vec[2]*a.z
+        # start_sum = normal_vec[0]*start.x + normal_vec[1]*start.y + normal_vec[2]*start.z
+        # diff_sum = normal_vec[0]*diff[0] + normal_vec[1]*diff[1] + normal_vec[2]*diff[2]
         
-        if diff_sum == 0:
-            # Something went wrong?
-            return False, None
-        else:
-            t = (sum - start_sum)/diff_sum
-            intersection = start.vec + diff*t
-            output = Point3(intersection[0], intersection[1], intersection[2])
-            if is_point_on_triangle(trg, output):
-                return True, output
-            else:
-                return False, output
+        # if diff_sum == 0:
+        #     # Something went wrong?
+        #     return False, None
+        # else:
+        #     t = (sum - start_sum)/diff_sum
+        #     intersection = start.vec + diff*t
+        #     output = Point3(intersection[0], intersection[1], intersection[2])
+        #     if is_point_on_triangle(trg, output):
+        #         return True, output
+        #     else:
+        #         return False, output
 
 
-def find_intersection(mesh_triangles, center):
-    line_list = []
+def find_intersection(mesh_triangles, edges):
     point_list = []
     
-    x, y, z = center.x, center.y, center.z
-    x_min, x_max = int(math.floor(x)), int(math.ceil(x))
-    y_min, y_max = int(math.floor(y)), int(math.ceil(y))
-    z_min, z_max = int(math.floor(z)), int(math.ceil(z))
-    
-    axes = [
-        [x_min, x_max],
-        [y_min, y_max],
-        [z_min, z_max]
-    ]
-    
-    vertices = itertools.product(*axes)
-    for start, end in itertools.combinations(vertices, 2):
-        p_s = Point3(start[0], start[1], start[2])
-        p_e = Point3(end[0], end[1], end[2])
-        if abs(dist(p_s, p_e) - 1) < 0.0000001:
-            line_list.append([p_s, p_e])
-    
-    for line_start, line_end in line_list:
+    for line_start, line_end in edges:
         for trig in mesh_triangles:
             has_points, point = segment_cross_triangle(trig, line_start, line_end)
             if has_points:
@@ -239,7 +238,7 @@ def generate_mesh():
     # p: u, v
     f_x = lambda p: r*math.cos(p[0])*math.sin(p[1])
     f_y = lambda p: r*math.sin(p[0])*math.sin(p[1])
-    f_z = lambda p: r*math.cos(p[1])
+    f_z = lambda p: 3.9*math.cos(p[1])
     px = []
     py = []
     for a in u:
@@ -348,14 +347,25 @@ def solve(mesh_triangles):
     # plot_points(center)
     sq_list = []
     pts = []
+    edges_list = []
+    # Pre-processing
     for c in center:
-        try:
-            intersections = find_intersection(mesh_triangles, c)
-            pts += intersections
-            squares = intersection_to_squares(intersections, c)
-            sq_list += squares
-        except Exception as e:
-            print(e)
+        edges = find_edges(c)
+        edges_list.append(edges)
+    
+    for i in range(0, len(edges_list)):
+        intersections = find_intersection(mesh_triangles, edges_list[i])
+        pts += intersections
+        squares = intersection_to_squares(intersections, center[i])
+        sq_list += squares
+        
+        # try:
+        #     intersections = find_intersection(mesh_triangles, c)
+        #     pts += intersections
+        #     squares = intersection_to_squares(intersections, c)
+        #     sq_list += squares
+        # except Exception as e:
+        #     print(e)
     print("---------------------Finished Finding Squares----------")
     stop = timeit.default_timer()
     print('Time: ', stop - start)
@@ -381,17 +391,17 @@ if __name__ == "__main__":
         if not is_triangle_degenrate(trg):
             mesh_triangles.append(trg)
     
-    file2 = open(r"example.txt", "w+") 
-    for tri in mesh_triangles:
-        p1 = tri.p1
-        p2 = tri.p2
-        p3 = tri.p3
-        string = str(p1.x) + " " + str(p1.y) + " " +  str(p1.z)  + " " +  str(p2.x) + " " + str(p2.y) + " " + str(p2.z) + " " + str(p3.x) + " " + str(p3.y) + " " + str(p3.z)
-        file2.write(string + "\n")
-    file2.close()
+    # file2 = open(r"example.txt", "w+") 
+    # for tri in mesh_triangles:
+    #     p1 = tri.p1
+    #     p2 = tri.p2
+    #     p3 = tri.p3
+    #     string = str(p1.x) + " " + str(p1.y) + " " +  str(p1.z)  + " " +  str(p2.x) + " " + str(p2.y) + " " + str(p2.z) + " " + str(p3.x) + " " + str(p3.y) + " " + str(p3.z)
+    #     file2.write(string + "\n")
+    # file2.close()
     
     print("Number of Triangles: ", len(mesh_triangles))
-    triangle_to_voxel(mesh_triangles)
+    # triangle_to_voxel(mesh_triangles)
     
     sq_list = solve(mesh_triangles)
     # debug_plot(mesh_triangles, pts, center)

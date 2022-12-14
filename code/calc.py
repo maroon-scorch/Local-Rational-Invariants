@@ -145,7 +145,7 @@ def legal_curve():
     directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
     grid_curve = [start]
     
-    max_run = 100
+    max_run = 10
     prev = start
     next = Point(0, 1)
     edge_list = [[start, next]]
@@ -233,19 +233,36 @@ def rectangle(w, h):
     # visualize(curve, "", False)
     curve.pop(-1)    
     return curve
+
+def counter_example():
     
+    curve = [Point(-1, 0), Point(0, 0)]
+    for i in range(50):
+        curve.append(Point(i, i+1))
+        if i != 49:
+            curve.append(Point(i+1, i+1))
+    for i in range(99):
+        curve.append(Point(50-i-2, 50))
+    
+    for i in range(49):
+        curve.append(Point(-50+i, 50-i-1))
+        curve.append(Point(-50+i+1, 50-i-1))
+    
+    # visualize(curve, "", False)
+    return curve
 
 # Return a list of specific grid curves to test for
 def specific_curve():
     c0 = [Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(1, 1), Point(1, 2), Point(0, 2), Point(0, 1)]
-    curves = [c0]
+    c1 = counter_example()
+    curves = [c0, c1]
     
     # for i in range(100):
     #     a = random.randint(1, 50)
     #     b = random.randint(1, 50)
     #     curves.append(rectangle(a, b))
     
-    for i in range(100):
+    for i in range(1000):
         current = legal_curve()
         if current != None:
             reverse_current = current.copy()
@@ -285,7 +302,8 @@ if __name__ == "__main__":
             # grid_curve_list.append(solution)
     
     grid_curve_list += specific_curve()
-     
+    # grid_curve_list += [counter_example()]
+    
     for curve in grid_curve_list:
         count_list = process_solution(curve)
         polynomial_list.append([count_list, curve])
