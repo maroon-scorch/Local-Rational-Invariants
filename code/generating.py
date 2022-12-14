@@ -110,16 +110,16 @@ def random_point(low, high):
 def find_vertice(start, end):
     vec1 = unit_vector(end.vec - start.vec)
     per_vec1 = np.array([-vec1[1], vec1[0]])
-    print(vec1)
-    print(per_vec1)
+    # print(vec1)
+    # print(per_vec1)
     matrix = np.column_stack((vec1, per_vec1))
-    print(matrix)
+    # print(matrix)
     
     radian = random.uniform(-20/180*math.pi, 20/180*math.pi)
     x_pos = math.cos(radian)
     y_pos = math.sin(radian)
     vector = np.array([[x_pos, y_pos]])
-    print(vector)
+    # print(vector)
     transformed_vec = np.matmul(matrix, np.transpose(vector))
     result_vec = end.vec + np.array(transformed_vec[0][0], transformed_vec[1][0])
     
@@ -152,7 +152,6 @@ def generate_curve(low, high, num_points, dimension):
 def custom_cuve(curve_x, curve_y, start, stop, num_points, scale):
     # Given a parameterized function for a curve, produces its polygonal approximation
     samples = np.linspace(start, stop, num=num_points).tolist()
-    print(samples)
     
     points = []
     for t in samples:

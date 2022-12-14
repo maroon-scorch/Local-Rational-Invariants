@@ -76,8 +76,8 @@ def label_vertex(adj_list):
     for vert, neighbor in adj_list:
         n0 = neighbor[0]
         n1 = neighbor[1]
-        # label_v = label_this_vertex_ignore(n0, n1, vert)
         label_v = label_this_vertex_ignore(n0, n1, vert)
+        # label_v = label_this_vertex_order(n0, n1, vert)
         
         if vertex_dict.get(label_v) == None:
             vertex_dict[label_v] = [vert]
@@ -102,8 +102,8 @@ def pretty_print(count_list, points):
     for idx, count in count_list:
         item = str(count) + "*x_" + idx + " + "
         string += item
-    # num = 0
-    num = turning_number(points)
+    num = 0
+    # num = turning_number(points)
     string += "0 == "
     string += (str(num) + ",\n")
     return string
@@ -145,7 +145,7 @@ def legal_curve():
     directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
     grid_curve = [start]
     
-    max_run = 10
+    max_run = 200
     prev = start
     next = Point(0, 1)
     edge_list = [[start, next]]
@@ -219,59 +219,15 @@ def legal_curve():
     # visualize(grid_curve, "", False)
     return grid_curve
 
-def rectangle(w, h):
-    curve = [Point(0, 0)]
-    
-    for i in range(1, w + 1):
-        curve.append(Point(i, 0))
-    for i in range(1, h + 1):
-        curve.append(Point(w, i))
-    for i in range(1, w + 1):
-        curve.append(Point(w - i, h))
-    for i in range(1, h + 1):
-        curve.append(Point(0, h - i))
-    # visualize(curve, "", False)
-    curve.pop(-1)    
-    return curve
-
-def counter_example():
-    
-    curve = [Point(-1, 0), Point(0, 0)]
-    for i in range(50):
-        curve.append(Point(i, i+1))
-        if i != 49:
-            curve.append(Point(i+1, i+1))
-    for i in range(99):
-        curve.append(Point(50-i-2, 50))
-    
-    for i in range(49):
-        curve.append(Point(-50+i, 50-i-1))
-        curve.append(Point(-50+i+1, 50-i-1))
-    
-    # visualize(curve, "", False)
-    return curve
-
 # Return a list of specific grid curves to test for
 def specific_curve():
     c0 = [Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(1, 1), Point(1, 2), Point(0, 2), Point(0, 1)]
-    c1 = counter_example()
-    curves = [c0, c1]
-    
-    # for i in range(100):
-    #     a = random.randint(1, 50)
-    #     b = random.randint(1, 50)
-    #     curves.append(rectangle(a, b))
+    curves = [c0]
     
     for i in range(1000):
         current = legal_curve()
         if current != None:
-            reverse_current = current.copy()
-            reverse_current.append(current[0])
-            reverse_current.reverse()
-            reverse_current.pop(-1)
-            
             curves.append(current)
-            curves.append(reverse_current)
     
     output = []
     for c in curves:
@@ -299,11 +255,10 @@ if __name__ == "__main__":
             parameter_list.append(param)
             points = custom_cuve(x, y, 0, 2*math.pi, 100, 30)
             solution = run(points, 2, False)
-            # grid_curve_list.append(solution)
+            grid_curve_list.append(solution)
     
     grid_curve_list += specific_curve()
-    # grid_curve_list += [counter_example()]
-    
+     
     for curve in grid_curve_list:
         count_list = process_solution(curve)
         polynomial_list.append([count_list, curve])

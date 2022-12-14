@@ -407,6 +407,11 @@ def run(points, dimension, close):
     refined_points = refine_input(points)
     refined_points = avoid_grid(refined_points)
     refined_points = refine_input(refined_points)
+    refined_points = remove_adjacent(refined_points)
+    
+    if not approx_equal(refined_points[0], refined_points[-1]):
+        refined_points.append(refined_points[0])
+    
     # visualize(refined_points, "Refined Input", True)
     
     # finds the intersections first

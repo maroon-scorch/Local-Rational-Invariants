@@ -36,6 +36,8 @@ def vert_to_edges_open(points):
 def edges_to_vert(edges):
     """Given a list of edges, convert them into a list of vertices"""
     vert = list(map(lambda ed: ed[0], edges))
+    if vert[0] != edges[-1][1]:
+        vert.append(edges[-1][1])
     return vert
 
 def label(point):
@@ -66,7 +68,6 @@ def bad_vertices(points):
     for triple in ang_list:
         ang = angle(triple[0], triple[1], triple[2])
         if not (min_range <= ang and ang <= max_range):
-            print(ang)
             faulty_ver_list.append([triple[1].x, triple[1].y])
     
     return faulty_ver_list
@@ -166,7 +167,7 @@ def visualize_edges(grid_edge_list):
         plt.plot([start.x, end.x], [start.y, end.y], 'k-')
         # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
     plt.show()
-    
+  
 # https://stackoverflow.com/questions/3460161/remove-adjacent-duplicate-elements-from-a-list
 def remove_adjacent(nums):
      return [a for a,b in zip(nums, nums[1:]+[not nums[-1]]) if a != b]

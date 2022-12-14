@@ -18,6 +18,7 @@ class Square:
         self.p2 = p2
         self.p3 = p3
         self.p4 = p4
+        self.center = midpoint_of(p1, p3)
         self.lst = [p1, p2, p3, p4]
         # The String Representation of the value of the Literal
         self.value = str(self.lst)
@@ -41,6 +42,14 @@ class Trig:
         self.lst = [p1, p2, p3]
         # The String Representation of the value of the Literal
         self.value = str(self.lst)
+        
+        # Find normal vector
+        plane_vec_1 = p2.vec - p1.vec
+        plane_vec_2 = p3.vec - p1.vec
+        self.normal = np.cross(plane_vec_1, plane_vec_2)
+
+        # Find area:
+        self.area = 1/2*abs(np.linalg.norm(self.normal))
 
     def __repr__(self):
         return str(self.lst)
@@ -58,6 +67,7 @@ def square_to_voxel(square_list):
     for sq in square_list:
         vtx = np.array([sq.p1.vec, sq.p2.vec, sq.p3.vec, sq.p4.vec])
         tri = a3.art3d.Poly3DCollection([vtx])
+        tri.set_alpha(0.5)
         ax.scatter(sq.p1.x, sq.p1.y, sq.p1.z, c = '#FF0000')
         ax.scatter(sq.p2.x, sq.p2.y, sq.p2.z, c = '#FF0000')
         ax.scatter(sq.p3.x, sq.p3.y, sq.p3.z, c = '#FF0000')
@@ -71,12 +81,13 @@ def triangle_to_voxel(trig_list):
     for sq in trig_list:
         vtx = np.array([sq.p1.vec, sq.p2.vec, sq.p3.vec])
         tri = a3.art3d.Poly3DCollection([vtx])
-        # tri.set_opacity(0.7)
+        tri.set_alpha(0.5)
         # tri.set_color(colors.rgb2hex(np.random.rand(3)))
-        tri.set_edgecolor('k')
+        
         ax.scatter(sq.p1.x, sq.p1.y, sq.p1.z, c = '#FF0000')
         ax.scatter(sq.p2.x, sq.p2.y, sq.p2.z, c = '#FF0000')
         ax.scatter(sq.p3.x, sq.p3.y, sq.p3.z, c = '#FF0000')
+        tri.set_edgecolor('k')
         ax.add_collection3d(tri)
     plt.show()
     
@@ -114,6 +125,14 @@ def visualize_edges(grid_edge_list):
         ax.plot([start.x, end.x], [start.y, end.y], [start.z, end.z], 'k-')
         # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
     plt.show()
+    
+def visualize_edges_lst(grid_edge_list):
+    ax = plt.figure().add_subplot(projection='3d')
+    for i, ed in enumerate(grid_edge_list):
+        start = ed[0]
+        end = ed[1]
+        ax.plot([start[0], end[0]], [start[1], end[1]], [start[2], end[2]], 'k-')
+    plt.show()
 
 def face_center_to_cube_center(c1, c2):
     mp = midpoint_of(c1, c2)
@@ -141,7 +160,7 @@ def is_square(v1, v2, v3, v4):
     return dl1 == standard and dl2 == standard and dl3 == standard and dl4 == standard
     
 
-def intersection_to_squares(intersection):
+def intersection_to_squares(intersection, center):
     """ Given a list of intersections contained in a unit voxel,
     convert it to a cubical approximation (roughly) """
     
@@ -164,11 +183,12 @@ def intersection_to_squares(intersection):
         
     cube_list = list(set(cube_list))
     center_list = list(set(center_list))
-    print(cube_list)
+    # print(cube_list)
     # visualize_edges(edge_list)
     
     # This is a list of vertices of the cubical faces
-    cube_list.append(face_center_to_cube_center(center_list[0], center_list[1]))
+    cube_list.append(center)
+    # cube_list.append(face_center_to_cube_center(center_list[0], center_list[1]))
     
     for v1, v2, v3, v4 in itertools.combinations(cube_list, 4):
         if is_square(v1, v2, v3, v4):
@@ -179,7 +199,7 @@ def intersection_to_squares(intersection):
             new_sq[2] = new_sq[3]
             new_sq[3] = temp      
             ns = Square(new_sq[0], new_sq[1], new_sq[2], new_sq[3])
-            print(ns)      
+            # print(ns)      
             square_list.append(ns)
     
     
@@ -187,7 +207,9 @@ def intersection_to_squares(intersection):
         
 
 def run():
-    tri_lst = [Trig(Point3(0, 0, 0), Point3(0, 0, 5), Point3(0, 5, 0))]
+    tri_lst = [Trig(Point3(0, 0, 0), Point3(0, 0, 5), Point3(0, 5, 0)), 
+               Trig(Point3(2.323823790216319, 0.0, 1.09106980242110), Point3(2.4567710601398276, 0.3167655508732572, 1.29645679061558)
+               , Point3(2.4771080832617316, 0.0, 1.29645679061558))]
     triangle_to_voxel(tri_lst)
     sq_lst = [Square(Point3(0, 0, 0), Point3(0, 0, 1), Point3(0, 1, 1), Point3(0, 1, 0)), Square(Point3(0, 0, 0), Point3(0, 0, -1), Point3(0, -1, -1), Point3(0, -1, 0))]
     square_to_voxel(sq_lst)
@@ -195,12 +217,12 @@ def run():
 # https://stackoverflow.com/questions/4622057/plotting-3d-polygons-in-python-matplotlib
 # The main body of the code:
 if __name__ == "__main__":
-    input = [Point3(0, 0, 0.3), Point3(0, 0.3, 0), Point3(0.3, 0, 0)]
-    plot_points(input)
-    output = intersection_to_squares(input)
-    square_to_voxel(output)
+    # input = [Point3(0, 0, 0.3), Point3(0, 0.3, 0), Point3(0.3, 0, 0)]
+    # plot_points(input)
+    # output = intersection_to_squares(input)
+    # square_to_voxel(output)
     
-    # run()
+    run()
 
 # n_radii = 8
 # n_angles = 36
