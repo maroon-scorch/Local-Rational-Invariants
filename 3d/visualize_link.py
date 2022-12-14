@@ -1,5 +1,6 @@
 import numpy as np
-from surface import visualize_edges_lst
+from surface import visualize_edges_lst, Square
+from point3 import *
 
 path_dict = {
     1: [1, 0, 0],
@@ -27,8 +28,7 @@ def link_to_edges(order_list):
     print(edges)
     
     return edges
-    
-    
+
 if __name__ == "__main__":
     order_list = [6,2,3,5,5,4,4,6,1,3]
     opposite = [3, 2, 6, 4, 1, 5]

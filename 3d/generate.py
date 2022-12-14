@@ -206,8 +206,8 @@ def find_edges(center):
 def generate_torus():
     R = 1.9
     r = 0.7
-    u = np.linspace(0, 2 * np.pi, 25)
-    v = np.linspace(0, 2*np.pi, 25)
+    u = np.linspace(0, 2 * np.pi, 10)
+    v = np.linspace(0, 2*np.pi, 10)
     # p: u, v
     f_x = lambda p: (R + r*math.cos(p[0]))*math.cos(p[1])
     f_y = lambda p: (R + r*math.cos(p[0]))*math.sin(p[1])
@@ -232,8 +232,8 @@ def generate_torus():
 
 def generate_mesh():
     r = 1.9
-    u = np.linspace(0, 2*np.pi, 20)
-    v = np.linspace(0, np.pi, 20)
+    u = np.linspace(0, 2*np.pi, 10)
+    v = np.linspace(0, np.pi, 10)
     
     # p: u, v
     f_x = lambda p: r*math.cos(p[0])*math.sin(p[1])
@@ -334,7 +334,7 @@ def solve(mesh_triangles):
     z_start, z_end = int_between(np.min(z_list), np.max(z_list))
     z_cen = lst_to_mid(z_start, z_end)
     
-    print(x_cen, y_cen, z_cen)
+    # print(x_cen, y_cen, z_cen)
     
     center = []
     for a in x_cen:
@@ -354,18 +354,14 @@ def solve(mesh_triangles):
         edges_list.append(edges)
     
     for i in range(0, len(edges_list)):
-        intersections = find_intersection(mesh_triangles, edges_list[i])
-        pts += intersections
-        squares = intersection_to_squares(intersections, center[i])
-        sq_list += squares
-        
-        # try:
-        #     intersections = find_intersection(mesh_triangles, c)
-        #     pts += intersections
-        #     squares = intersection_to_squares(intersections, c)
-        #     sq_list += squares
-        # except Exception as e:
-        #     print(e)
+        try:
+            intersections = find_intersection(mesh_triangles, edges_list[i])
+            pts += intersections
+            squares = intersection_to_squares(intersections, center[i])
+            sq_list += squares
+        except Exception as e:
+            print(e)
+            print("___________________________________________________")
     print("---------------------Finished Finding Squares----------")
     stop = timeit.default_timer()
     print('Time: ', stop - start)
@@ -381,8 +377,8 @@ if __name__ == "__main__":
 
     # Torus
 
-    mesh_3d = generate_mesh()
-    # mesh_3d = generate_torus()
+    # mesh_3d = generate_mesh()
+    mesh_3d = generate_torus()
     # mesh_3d = potato_chip()
     m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
     mesh_triangles = []
@@ -401,7 +397,7 @@ if __name__ == "__main__":
     # file2.close()
     
     print("Number of Triangles: ", len(mesh_triangles))
-    # triangle_to_voxel(mesh_triangles)
+    triangle_to_voxel(mesh_triangles)
     
     sq_list = solve(mesh_triangles)
     # debug_plot(mesh_triangles, pts, center)
