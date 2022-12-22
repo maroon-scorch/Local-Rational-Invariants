@@ -305,11 +305,6 @@ def side(points, pt):
         j = i
     return odd
 
-
-#---------------------------------------------------------
-#               Euler Characteristic for Curves
-#---------------------------------------------------------
-
 def count_v(intersect, pt):
     """Count the degree of intersection"""
     count = 0
@@ -388,7 +383,6 @@ def turning_number(points):
 #---------------------------------------------------------
 #               Euler Characteristic for Surfaces
 #---------------------------------------------------------
-
 
     
 

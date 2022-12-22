@@ -72,7 +72,7 @@ def clickRunButton():
     win.destroy()
     solution = run(point_list, 2, False)
     count_list = process_solution(solution)
-    txt = pretty_print(c_lst)
+    txt = pretty_print(count_list, solution)
     print(txt)
     
 

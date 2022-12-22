@@ -77,7 +77,7 @@ def label_vertex(adj_list):
         n0 = neighbor[0]
         n1 = neighbor[1]
         # label_v = label_this_vertex_ignore(n0, n1, vert)
-        label_v = label_this_vertex_order(n0, n1, vert)
+        label_v = label_this_vertex_ignore(n0, n1, vert)
         
         if vertex_dict.get(label_v) == None:
             vertex_dict[label_v] = [vert]
