@@ -236,7 +236,7 @@ def remove_vertex(square_list, vertex, center):
 
 if __name__ == "__main__":
     file = open("polynomial.txt", "w+")
-    iter = 25
+    iter = 1
     for i in range(iter):
         print("Iteration: ", i)
         a = random.randint(2, 5)
@@ -247,11 +247,11 @@ if __name__ == "__main__":
         vertex = random.choice(vertice)
         square_list = remove_vertex(square_list, vertex, center)
         
+        square_to_voxel(square_list)
         rigid_polynomials = apply_rigid_motion(square_list, 8)
         for r in rigid_polynomials:
             file.write(r)
         
-        # square_to_voxel(square_list)
         vert_dict = {}
         for sq in square_list:
             append_item_alt(vert_dict, sq)
