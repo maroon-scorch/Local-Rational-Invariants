@@ -111,7 +111,7 @@ def vert_link(vertex, squares):
             vert_dict[key_e][1].add(to_point(start))
         else:
             vert_dict[key_e] = (end, {to_point(start)})
-    
+    # print("Dictionary: ", vert_dict)
     assert is_2_regular(vert_dict) and is_connected(vert_dict), "ERROR: Vertex Link at " + str(vertex) + " has to be a connected cycle graph --------------------------------"
     
     vertices = [vert_dict[key][0] for key in vert_dict.keys()]

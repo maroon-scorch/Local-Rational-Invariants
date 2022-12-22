@@ -14,7 +14,7 @@ from generate import *
     
 # Run program using 'python main.py [directory to file]'
 def read_input(inputFile):
-    """ Read and parse the input file, returning the list of points and its dimension """
+    """ Read and parse the input file, returning the list of triangles and its dimension """
     trig_list = []
     with open(inputFile, "r") as f:
         dimension = int(f.readline())

@@ -29,10 +29,14 @@ class Square:
     def __eq__(self, other):
         if type(other) != Square:
             return False
-        return self.p1 == other.p1 and self.p2 == other.p2 and self.p3 == other.p3 and self.p4 == other.p4
+        return set(self.lst) == set(other.lst)
+        # return self.p1 == other.p1 and self.p2 == other.p2 and self.p3 == other.p3 and self.p4 == other.p4
 
     def __hash__(self):
       return hash((self.p1, self.p2, self.p3, self.p4))
+  
+    def to_string(self):
+        return self.p1.to_string() + " " + self.p2.to_string() + " " + self.p3.to_string() + " " + self.p4.to_string()
 
 class Trig:
     def __init__(self, p1, p2, p3):
