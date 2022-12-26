@@ -140,19 +140,30 @@ def vert_link(vertex, squares):
                 break
     if len(path) != len(vertices):
         assert False, "ERROR: The Vertex Link is not a Cycle Graph! --------------------------------------------"
+
+    
+    # Alternating encoding of vertex:
+    path.append(min_vertex)
+    vec_path = []
+    for v in path:
+        # print(v)
+        diff = np.asarray(v) - vertex.vec
+        vec_path.append(diff)
+    order_path = [directions(elt) for elt in vec_path]
+    order_path = [i for i in order_path if i != 100]
     
     # This creates a proper traversal of the link
-    # print(path)
-    vec_path = []
-    for idx, vert in enumerate(path):
-        if idx != 0:
-            diff = np.asarray(vert) - np.asarray(path[idx - 1])
-            vec_path.append(diff)
-    vec_path.append(np.asarray(path[0]) - np.asarray(path[-1]))
-    # print(vec_path)
-    order_path = [directions(elt) for elt in vec_path]
-    # print(order_path)
-    # print("-------------------------------------------")
+    # # print(path)
+    # vec_path = []
+    # for idx, vert in enumerate(path):
+    #     if idx != 0:
+    #         diff = np.asarray(vert) - np.asarray(path[idx - 1])
+    #         vec_path.append(diff)
+    # vec_path.append(np.asarray(path[0]) - np.asarray(path[-1]))
+    # # print(vec_path)
+    # order_path = [directions(elt) for elt in vec_path]
+    # # print(order_path)
+    # # print("-------------------------------------------")
     
     # Visualizing Link of Vertex
     # ordered_link = []
@@ -183,6 +194,7 @@ def dict_to_polynomial(type_dict, num):
     string += (str(num) + ",\n")
     return string, variables
 
+# For path variables
 def symmetrize_polynomials(variables):
     polynomial_list = []
     var = set()
@@ -196,6 +208,23 @@ def symmetrize_polynomials(variables):
                 dual_variable += str(c - 1)
             else:
                 dual_variable += str(c + 1)
+        var.add(v)
+        var.add(dual_variable)
+        # print(dual_variable)
+        polynomial = v + " == " + dual_variable
+        polynomial += ",\n"
+        polynomial_list.append(polynomial)
+    return polynomial_list, var
+
+def symmetrize_polynomials_alt(variables):
+    polynomial_list = []
+    var = set()
+    for v in variables:
+        # print(v)
+        var_index = v[2:][::-1]
+        dual_variable = "x_"
+        for char in var_index:
+            dual_variable += char
         var.add(v)
         var.add(dual_variable)
         # print(dual_variable)
@@ -296,11 +325,11 @@ def squares_to_polynomials(squares, num):
     return polynomial, variables
 
 if __name__ == "__main__":
-    iter = 250
+    iter = 50
     all_variables = set()
     file = open("polynomial.txt", "w+")
     
-    for i in range(iter): 
+    for i in range(0): 
         
         print("Iteration: ", i)
         try:
@@ -328,7 +357,7 @@ if __name__ == "__main__":
     for i in range(iter):
         print("Iteration: ", i + iter)
         try:       
-            R = random.uniform(2.5, 10)
+            R = random.uniform(2.5, 5)
             r = random.uniform(0.5, R/4)
             triangles = generate_T2(R, r)
             
@@ -346,7 +375,7 @@ if __name__ == "__main__":
             print("------------------------------------------")
             continue
 
-    polynomial_list, all_variables = symmetrize_polynomials(all_variables)
+    polynomial_list, all_variables = symmetrize_polynomials_alt(all_variables)
     for p in polynomial_list:
         file.write(p)
         

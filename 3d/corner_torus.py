@@ -286,7 +286,7 @@ if __name__ == "__main__":
     
     # square_to_voxel(square_list)
     
-    file = open("polynomial.txt", "w+")
+    file = open("temp.txt", "w+")
     iter = 25
     for i in range(iter):
         print("Iteration: ", i)
