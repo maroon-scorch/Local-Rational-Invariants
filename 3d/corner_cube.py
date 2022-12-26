@@ -237,18 +237,19 @@ def remove_vertex(square_list, vertex, center):
 if __name__ == "__main__":
     file = open("temp.txt", "w+")
     iter = 30
+    square_list, vertice, center = generate_cube(4, 4, 4)
     for i in range(iter):
         print("Iteration: ", i)
         a = random.randint(2, 5)
         b = random.randint(2, 5)
         c = random.randint(2, 5)
         
-        square_list, vertice, center = generate_cube(a, b, c)
+        # square_list, vertice, center = generate_cube(a, b, c)
         vertex = random.choice(vertice)
         square_list = remove_vertex(square_list, vertex, center)
         
         # square_to_voxel(square_list)
-        # rigid_polynomials = apply_rigid_motion(square_list, 8)
+        # rigid_polynomials = apply_rigid_motion(square_list, 8, 2)
         # for r in rigid_polynomials:
         #    file.write(r)
         

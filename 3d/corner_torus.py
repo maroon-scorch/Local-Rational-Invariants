@@ -3,6 +3,7 @@ from point3 import *
 import math, itertools, random, sys
 import numpy as np
 from euler import vert_link, order_to_string, dict_to_polynomial, clean_input
+from rigid_motion import apply_rigid_motion
 
 # ----------------------------------------------------------------------------------
 # def append_item(dict, square):
@@ -294,6 +295,11 @@ if __name__ == "__main__":
         vertex = random.choice(vertice)
         square_list = remove_vertex(square_list, vertex)
         # square_to_voxel(square_list)
+        
+        rigid_polynomials = apply_rigid_motion(square_list, 8, 0)
+        for r in rigid_polynomials:
+           file.write(r)
+        
         vert_dict = {}
         for sq in square_list:
             append_item_alt(vert_dict, sq)

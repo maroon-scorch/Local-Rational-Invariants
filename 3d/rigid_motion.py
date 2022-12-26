@@ -95,7 +95,7 @@ def rotate_squares_phi(square_list, phi):
         
     return new_squares
 
-def apply_rigid_motion(square_list, iter):
+def apply_rigid_motion(square_list, iter, num):
     polynomial_list = []
     angle = [0, math.pi/2, 3*math.pi/2, math.pi]
     for i in range(iter):
@@ -125,7 +125,7 @@ def apply_rigid_motion(square_list, iter):
         
         # print(type_dict)
             
-        polynomial, variables = dict_to_polynomial(type_dict, 0)
+        polynomial, variables = dict_to_polynomial(type_dict, num)
         # print(polynomial)
         polynomial_list.append(polynomial)
     return polynomial_list
