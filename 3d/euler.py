@@ -162,8 +162,8 @@ def vert_link(vertex, squares):
     # vec_path.append(np.asarray(path[0]) - np.asarray(path[-1]))
     # # print(vec_path)
     # order_path = [directions(elt) for elt in vec_path]
-    # # print(order_path)
-    # # print("-------------------------------------------")
+    # print(order_path)
+    # print("-------------------------------------------")
     
     # Visualizing Link of Vertex
     # ordered_link = []

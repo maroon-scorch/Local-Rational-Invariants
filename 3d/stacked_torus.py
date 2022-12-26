@@ -2,7 +2,7 @@ from surface import Square, square_to_voxel
 from point3 import *
 import math, itertools, random, sys
 import numpy as np
-from euler import vert_link, order_to_string, dict_to_polynomial, clean_input
+from euler import vert_link, order_to_string, dict_to_polynomial, clean_input, symmetrize_polynomials_alt
 from corner_cube import find_problematic_vertice, point_cloud_to_squares
 
 def append_item_alt(dict, square):
@@ -172,18 +172,13 @@ if __name__ == "__main__":
     square_list = remove_duplicate(square_list)
     
     # square_to_voxel(square_list)
-    right_squares = integerify_square(translate(square_list, 5, 0, 0))
-    left_squares = integerify_square(translate(square_list, -5, 0, 0))
+    right_squares = integerify_square(translate(square_list, 8, 0, 0))
+    left_squares = integerify_square(translate(square_list, 0, 0, 2))
     double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
     # square_to_voxel(double_torus)
-    print(len(double_torus))
-    # double_torus = list(set(double_torus))
-    
+    # print(len(double_torus))
     double_torus = remove_repeat_squares(double_torus)
-    
-    d2 = integerify_square(translate(double_torus, 0, 10, 0))
-    double_torus += d2
-    double_torus = remove_repeat_squares(double_torus)
+    # square_to_voxel(double_torus)
     
     a = random.randint(-10, 10)
     b = random.randint(-10, 10)
@@ -194,25 +189,32 @@ if __name__ == "__main__":
     double_torus = rotate_squares_phi(double_torus, random.choice(angle))
     double_torus = integerify_square(double_torus)
     
-    # print(len(double_torus))
-    
-    square_to_voxel(double_torus)
-    
     vert_dict = {}
     for sq in double_torus:
         append_item_alt(vert_dict, sq)
     
     type_dict = {}
+    variables = set()
     for k in vert_dict.keys():
         order_list = vert_link(k, vert_dict[k])
         vertex_type = order_to_string(order_list)
+        
+        # if vertex_type == "524623316415":
+        #     print(k)
+        #     square_to_voxel(vert_dict[k])
         
         if vertex_type in type_dict:
             type_dict[vertex_type] += 1
         else:
             type_dict[vertex_type] = 1
-        
+    
+    
+    
     polynomial, variables = dict_to_polynomial(type_dict, -2)
+    
+    lst, _ = symmetrize_polynomials_alt(variables)
+    for i in lst:
+        print(i)
     
     print(polynomial)
     
