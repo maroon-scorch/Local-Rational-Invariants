@@ -2,9 +2,8 @@ from surface import Square, square_to_voxel
 from point3 import *
 import math, itertools, random, sys
 import numpy as np
-from euler import vert_link, order_to_string, dict_to_polynomial, clean_input, symmetrize_polynomials_alt
-from corner_cube import find_problematic_vertice, point_cloud_to_squares
-from corner_torus import remove_vertex
+from euler import vert_link, order_to_string, dict_to_polynomial
+from corner_cube import point_cloud_to_squares, generate_cube
 
 def append_item_alt(dict, square):
     points = square.lst
@@ -97,50 +96,6 @@ def rotate_squares_phi(square_list, phi):
         
     return new_squares
 
-def apply_rigid_motion(square_list, iter):
-    polynomial_list = []
-    angle = [0, math.pi/2, 3*math.pi/2, math.pi]
-    for i in range(iter):
-        a = random.randint(-10, 10)
-        b = random.randint(-10, 10)
-        c = random.randint(-10, 10)
-        
-        square_list = translate(square_list, a, b, c)
-        square_list = rotate_squares_theta(square_list, random.choice(angle))
-        square_list = rotate_squares_phi(square_list, random.choice(angle))
-        square_list = integerify_square(square_list)
-        
-        
-        vert_dict = {}
-        for sq in square_list:
-            append_item_alt(vert_dict, sq)
-        
-        type_dict = {}
-        for k in vert_dict.keys():
-            order_list = vert_link(k, vert_dict[k])
-            vertex_type = order_to_string(order_list)
-            
-            if vertex_type in type_dict:
-                type_dict[vertex_type] += 1
-            else:
-                type_dict[vertex_type] = 1
-        
-        # print(type_dict)
-            
-        polynomial, variables = dict_to_polynomial(type_dict, 0)
-        # print(polynomial)
-        polynomial_list.append(polynomial)
-    return polynomial_list
-
-
-
-def integerify_square(squares):
-    clean_list = []
-    for sq in squares:
-        new_sq = Square(round_p3(sq.p1), round_p3(sq.p2),  round_p3(sq.p3), round_p3(sq.p4))
-        clean_list.append(new_sq)
-    return clean_list  
-
 def remove_duplicate(square_list):
     output = []
     for sq in square_list:
@@ -193,52 +148,139 @@ def scale_square(square_list, factor):
     return output
 
 if __name__ == "__main__":
-    input_file = sys.argv[1]
     angle = [0, math.pi/2, 3*math.pi/2, math.pi]
     
-    square_list, vertice = load_squares(input_file)
-    square_list = integerify_square(square_list)
-    square_list = remove_duplicate(square_list)
+    # cube, _, _ = generate_cube(1, 1, 19)
+    # cube1, _, _ = generate_cube(1, 1, 10)
+    hedge, _, _ = generate_cube(1, 1, 10)
+    h2, _, _ = generate_cube(10, 1, 1)
+    h3, _, _ = generate_cube(1, 10, 1)
     
-    # square_to_voxel(square_list)
-    right_squares = integerify_square(translate(square_list, 8, 0, 0))
-    left_squares = integerify_square(translate(square_list, 0, 0, 2))
-    double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
-    # square_to_voxel(double_torus)
-    # print(len(double_torus))
-    double_torus = remove_repeat_squares(double_torus)
-    double_torus = scale_square(double_torus, 2)
+    squares = []
+    
+    # Crystal Structure
+    for i in range(10):
+        squares += translate(hedge, i, 0, 0)
+        squares = remove_repeat_squares(squares)
+    for i in range(10):
+        squares += translate(h2, 1, i, -1)
+        squares = remove_repeat_squares(squares)
+    for i in range(10):
+        squares += translate(h3, 1, 1, i)
+        squares = remove_repeat_squares(squares)
+    
+    # squares += translate(hedge, 0, 0, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(hedge, 0, 0, -10)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h2, 1, 0, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h2, -10, 0, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h3, 0, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h3, 0, -10, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(squares, 21, 0, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(squares, 0, 0, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # Two examples:
+    # squares += translate(h2, 0, 0, 0)
+    # squares += translate(h3, 0, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h3, 9, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # cop = integerify_square(rotate_squares_phi(squares, math.pi/2))
+    # squares += translate(cop, 0, 12, -10)
+    # squares = remove_repeat_squares(squares)
+    
+    # c1, _, _ = generate_cube(3, 3, 1)
+    # squares += c1 + translate(c1, 0, 0, 20)
+    # squares += translate(cube, 1, 0, 1)
+    # squares += translate(cube1, 1, 1, 4)
+    # squares += translate(cube, 1, 2, 1)
+    # squares = remove_repeat_squares(squares)
+    
+    # Torus connected by a string:
+    # squares += translate(h2, 0, 0, 0)
+    # squares += translate(h3, 0, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    # squares += translate(h3, 9, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h2, 0, 11, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(squares, 6, 8, 1)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(squares, 0, 0, 1) + translate(squares, 0, 0, 2)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(squares, 11, 0, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(hedge, -1, 5, 2)
+    # squares = remove_repeat_squares(squares)
+    # squares += translate(hedge, 21, 5, 2)
+    # squares = remove_repeat_squares(squares)
+    
+    # c4, _, _ = generate_cube(21, 1, 1)
+    # squares += translate(c4, 0, 5, 11)
+    # squares = remove_repeat_squares(squares)
+    
+    # Stair case:
+    # for i in range(5):
+    #     for j in range(i):
+    #         squares += translate(h3, i, 0, j)
+    #         squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h3, 9, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # cop = integerify_square(rotate_squares_phi(squares, math.pi/2))
+    # squares += translate(cop, 0, 12, -10)
+    # squares = remove_repeat_squares(squares)
+    
+    # Cube
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # squares += unit
+    # squares += translate(unit, 1, 0, 0) + translate(unit, 2, 0, 0)
+    # squares += translate(unit, 0, 2, 0) + translate(unit, 1, 2, 0) + translate(unit, 2, 2, 0)
+    # squares += translate(unit, 0, 1, 0) + translate(unit, 2, 1, 0)
+    # squares += translate(unit, 0, 0, 1) + translate(unit, 1, 0, 1) + translate(unit, 2, 0, 1)
+    # squares += translate(unit, 0, 2, 1) + translate(unit, 1, 2, 1) + translate(unit, 2, 2, 1)
+    # squares += translate(unit, 0, 0, 2) + translate(unit, 1, 0, 2) + translate(unit, 2, 0, 2)
+    # squares += translate(unit, 0, 2, 2) + translate(unit, 1, 2, 2) + translate(unit, 2, 2, 2)
+    # #squares += translate(unit, 0, 1, 1) + translate(unit, 2, 1, 1)
+    # squares += translate(unit, 0, 1, 2) + translate(unit, 2, 1, 2)
+    # # squares += translate(unit, 1, 1, 1)
+    # squares = remove_repeat_squares(squares)
+    
+    
+    
+    square_to_voxel(squares)
 
-    # a = random.randint(-10, 10)
-    # b = random.randint(-10, 10)
-    # c = random.randint(-10, 10)
-        
-    # double_torus = translate(double_torus, a, b, c)
-    # double_torus = rotate_squares_theta(double_torus, random.choice(angle))
-    # double_torus = rotate_squares_phi(double_torus, random.choice(angle))
-    # double_torus = integerify_square(double_torus)
-    file = open("temp.txt", "w+")
-    for i in range(100):
+
+    file = open("glue.txt", "w+")
+    for i in range(1):
         print("Iteration: ", i)
-        dt = translate(double_torus, 0, 0, 0)
+        dt = translate(squares, 0, 0, 0)
         
         vert_dict = {}
         for sq in dt:
             append_item_alt(vert_dict, sq)
-        
-        dt = remove_vertex(dt, random.choice(list(vert_dict.keys())))
-        dt = remove_vertex(dt, random.choice(list(vert_dict.keys())))
-        
-        
-        # square_to_voxel(dt)
-        a = random.randint(-10, 10)
-        b = random.randint(-10, 10)
-        c = random.randint(-10, 10)
-        
-        dt = translate(dt, a, b, c)
-        dt = rotate_squares_theta(dt, random.choice(angle))
-        dt = rotate_squares_phi(dt, random.choice(angle))
-        dt = integerify_square(dt)
         
         vert_dict = {}
         for sq in dt:
@@ -250,23 +292,12 @@ if __name__ == "__main__":
             order_list = vert_link(k, vert_dict[k])
             vertex_type = order_to_string(order_list)
             
-            # if vertex_type == "524623316415":
-            #     print(k)
-            #     square_to_voxel(vert_dict[k])
-            
             if vertex_type in type_dict:
                 type_dict[vertex_type] += 1
             else:
                 type_dict[vertex_type] = 1
         
-        polynomial, variables = dict_to_polynomial(type_dict, -2)
+        polynomial, variables = dict_to_polynomial(type_dict, 2)
         file.write(polynomial)
     
-    # lst, _ = symmetrize_polynomials_alt(variables)
-    # # for i in lst:
-    # #     print(i)
     file.close()
-    # print(polynomial)
-    
-    # 77*x_13241 + 12*x_15231 + 9*x_13251 + 24*x_16251 + 18*x_15261 + 14*x_16231 + 61*x_14231 + 9*x_14251 + 12*x_15241 + 7*x_14261 + 19*x_36453 + 6*x_15361 + 4*x_1351 + 12*x_14531 + 3*x_1631 + 8*x_13641 + 7*x_13261 + 3*x_145231 + 6*x_25462 + 3*x_132641 + 4*x_142351 + 5*x_16351 + 4*x_24532 + 4*x_142361 + 14*x_16241 + 9*x_23642 + 3*x_154231 + 3*x_16451 + 3*x_164231 + 4*x_135241 + 3*x_26352 + 2*x_136241 + 3*x_1451 + 8*x_15461 + 4*x_1461 + 2*x_153241 + 11*x_23542 + 11*x_35463 + 2*x_163241 + 6*x_24632 + 2*x_2452 + 5*x_26452 + 4*x_2462 + 2*x_2532 + 2*x_2632 + 3*x_132451 + 2*x_142531 + 8*x_25362 + 4*x_142631 + 7*x_14631 + 2*x_1541 + 1*x_1641 + 2*x_1361 + 3*x_2352 + 3*x_2362 + 3*x_132461 + 3*x_132541 + 3*x_2542 + 1*x_1531 + 3*x_13541 + 3*x_146231 + 1*x_2642 + 0 == -2,
-    

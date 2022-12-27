@@ -4,6 +4,7 @@ import math, itertools, random, sys
 import numpy as np
 from euler import vert_link, order_to_string, dict_to_polynomial, clean_input
 
+
 def append_item_alt(dict, square):
     points = square.lst
     for p in points:

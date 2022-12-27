@@ -3,7 +3,7 @@ from point3 import *
 import math, itertools, random, sys
 import numpy as np
 from euler import vert_link, order_to_string, dict_to_polynomial, clean_input
-from rigid_motion import apply_rigid_motion
+from rigid_motion import apply_rigid_motion, translate, integerify_square
 
 # ----------------------------------------------------------------------------------
 # def append_item(dict, square):
@@ -253,6 +253,41 @@ def remove_vertex(square_list, vertex):
     return square_list
     # print(neighbor)
 
+def scale_square_xyz(square_list, x_factor, y_factor, z_factor):    
+    output = []
+    factor_list = [x_factor, y_factor, z_factor]
+    x_center = np.asarray([0, y_factor/2, z_factor/2])
+    y_center = np.asarray([x_factor/2, 0, z_factor/2])
+    z_center = np.asarray([x_factor/2, y_factor/2, 0])
+    center_list = [x_center, y_center, z_center]
+    point_list = [[], [], []]
+    
+    for i in range(0, y_factor + 1):
+        for j in range(0, z_factor + 1):
+            point_list[0].append(Point3(0, i, j))
+
+    for i in range(0, x_factor + 1):
+        for j in range(0, z_factor + 1):
+            point_list[1].append(Point3(i, 0, j))
+            
+    for i in range(0, x_factor + 1):
+        for j in range(0, y_factor + 1):
+            point_list[0].append(Point3(i, j, 0))
+
+    point_list[0] = point_cloud_to_squares(point_list[0])
+    point_list[1] = point_cloud_to_squares(point_list[1])
+    point_list[2] = point_cloud_to_squares(point_list[2])
+    
+    for sq in square_list:
+        diff = (sq.p1.vec - sq.center.vec).tolist()
+        axis = diff.index(0)
+        
+        vector = (factor_list[axis]*sq.center.vec - center_list[axis]).tolist()
+        new_squares = translate(point_list[axis], vector[0], vector[1], vector[2])
+        output += new_squares
+    output = integerify_square(output)
+    return output
+
 
 def load_squares(input_file):
     sq_list = []
@@ -287,15 +322,15 @@ if __name__ == "__main__":
     
     # square_to_voxel(square_list)
     
-    file = open("temp.txt", "w+")
-    iter = 25
+    file = open("temp1.txt", "w+")
+    iter = 1
     for i in range(iter):
         print("Iteration: ", i)
         square_list, vertice, center = load_squares(input_file)
         vertex = random.choice(vertice)
         square_list = remove_vertex(square_list, vertex)
-        # square_to_voxel(square_list)
-        
+        square_to_voxel(square_list)
+        # square_list = scale_square_xyz(square_list, random.randint(2, 5))
         rigid_polynomials = apply_rigid_motion(square_list, 8, 0)
         for r in rigid_polynomials:
            file.write(r)

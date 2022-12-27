@@ -3,7 +3,7 @@ from point3 import *
 import math, itertools, random, sys
 import numpy as np
 from euler import vert_link, order_to_string, dict_to_polynomial, clean_input, symmetrize_polynomials_alt
-from corner_cube import find_problematic_vertice, point_cloud_to_squares
+from corner_cube import find_problematic_vertice, point_cloud_to_squares, generate_cube
 from corner_torus import remove_vertex
 
 def append_item_alt(dict, square):
@@ -200,25 +200,57 @@ if __name__ == "__main__":
     square_list = integerify_square(square_list)
     square_list = remove_duplicate(square_list)
     
-    # square_to_voxel(square_list)
-    right_squares = integerify_square(translate(square_list, 8, 0, 0))
-    left_squares = integerify_square(translate(square_list, 0, 0, 2))
+    
+    # Vertical Connect:
+    right_squares = integerify_square(translate(square_list, 0, 0, 2))
+    left_squares = integerify_square(translate(square_list, 0, 0, -2))
     double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
     # square_to_voxel(double_torus)
     # print(len(double_torus))
     double_torus = remove_repeat_squares(double_torus)
+    cube, _, _ = generate_cube(1, 1, 2)
+    double_torus += translate(cube, 4, -3, -1)
+    double_torus = remove_repeat_squares(double_torus)
+    
+    double_torus += translate(cube, 2, -3, -1)
+    double_torus = remove_repeat_squares(double_torus)
+    
+    c2, _, _ = generate_cube(10, 1, 1)
+    double_torus += translate(c2, 5, -3, -1)
+    double_torus = remove_repeat_squares(double_torus)
+    
+    c3, _, _ = generate_cube(5, 5, 5)
+    double_torus += translate(c3, 15, -3, -1)
+    double_torus = remove_repeat_squares(double_torus)
+    
+    # square_to_voxel(double_torus)
+    
+    # Horiztonal Connect:
+    
+    # right_squares = integerify_square(translate(square_list, 6, 0, 0))
+    # left_squares = integerify_square(translate(square_list, -6, 0, 0))
+    # double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
+    # # square_to_voxel(double_torus)
+    # # print(len(double_torus))
+    # double_torus = remove_repeat_squares(double_torus)
+    
+    # # double_torus = scale_square(double_torus, 2)
+    
+    # # -----------------------
+    # cube, _, _ = generate_cube(8, 1, 1)
+    # double_torus += translate(cube, -4, -6, -1)
+    # # double_torus += translate(cube, -4, 5, 0)
+    # # ------------------------
+    # # cube, _, _ = generate_cube(4, 1, 1)
+    # # double_torus += translate(cube, -2, 0, 1)
+    
+    double_torus = remove_repeat_squares(double_torus)
+    square_to_voxel(double_torus)
+    
     double_torus = scale_square(double_torus, 2)
 
-    # a = random.randint(-10, 10)
-    # b = random.randint(-10, 10)
-    # c = random.randint(-10, 10)
-        
-    # double_torus = translate(double_torus, a, b, c)
-    # double_torus = rotate_squares_theta(double_torus, random.choice(angle))
-    # double_torus = rotate_squares_phi(double_torus, random.choice(angle))
-    # double_torus = integerify_square(double_torus)
-    file = open("temp.txt", "w+")
-    for i in range(100):
+    file = open("temp2.txt", "w+")
+    for i in range(50):
         print("Iteration: ", i)
         dt = translate(double_torus, 0, 0, 0)
         
@@ -227,6 +259,11 @@ if __name__ == "__main__":
             append_item_alt(vert_dict, sq)
         
         dt = remove_vertex(dt, random.choice(list(vert_dict.keys())))
+        
+        vert_dict = {}
+        for sq in dt:
+            append_item_alt(vert_dict, sq)
+            
         dt = remove_vertex(dt, random.choice(list(vert_dict.keys())))
         
         
@@ -259,14 +296,7 @@ if __name__ == "__main__":
             else:
                 type_dict[vertex_type] = 1
         
-        polynomial, variables = dict_to_polynomial(type_dict, -2)
+        polynomial, variables = dict_to_polynomial(type_dict, -4)
         file.write(polynomial)
     
-    # lst, _ = symmetrize_polynomials_alt(variables)
-    # # for i in lst:
-    # #     print(i)
     file.close()
-    # print(polynomial)
-    
-    # 77*x_13241 + 12*x_15231 + 9*x_13251 + 24*x_16251 + 18*x_15261 + 14*x_16231 + 61*x_14231 + 9*x_14251 + 12*x_15241 + 7*x_14261 + 19*x_36453 + 6*x_15361 + 4*x_1351 + 12*x_14531 + 3*x_1631 + 8*x_13641 + 7*x_13261 + 3*x_145231 + 6*x_25462 + 3*x_132641 + 4*x_142351 + 5*x_16351 + 4*x_24532 + 4*x_142361 + 14*x_16241 + 9*x_23642 + 3*x_154231 + 3*x_16451 + 3*x_164231 + 4*x_135241 + 3*x_26352 + 2*x_136241 + 3*x_1451 + 8*x_15461 + 4*x_1461 + 2*x_153241 + 11*x_23542 + 11*x_35463 + 2*x_163241 + 6*x_24632 + 2*x_2452 + 5*x_26452 + 4*x_2462 + 2*x_2532 + 2*x_2632 + 3*x_132451 + 2*x_142531 + 8*x_25362 + 4*x_142631 + 7*x_14631 + 2*x_1541 + 1*x_1641 + 2*x_1361 + 3*x_2352 + 3*x_2362 + 3*x_132461 + 3*x_132541 + 3*x_2542 + 1*x_1531 + 3*x_13541 + 3*x_146231 + 1*x_2642 + 0 == -2,
-    
