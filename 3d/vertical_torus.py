@@ -97,6 +97,26 @@ def rotate_squares_phi(square_list, phi):
         
     return new_squares
 
+def rotate_squares_psi(square_list, psi):
+    new_squares = []
+    for sq in square_list:
+        s1 = to_point(rotate_psi(sq.p1.vec, psi))
+        s2 = to_point(rotate_psi(sq.p2.vec, psi))
+        s3 = to_point(rotate_psi(sq.p3.vec, psi))
+        s4 = to_point(rotate_psi(sq.p4.vec, psi))
+        new_squares.append(Square(s1, s2, s3, s4))
+        
+    return new_squares
+
+def rotate_psi(array, phi):
+    original_point = array.tolist()
+    new_point = array.tolist()
+    
+    new_point[0] = original_point[0]*math.cos(phi) - original_point[1]*math.sin(phi)
+    new_point[1] = original_point[0]*math.sin(phi) + original_point[1]*math.cos(phi)
+    
+    return np.asarray(new_point)
+
 def apply_rigid_motion(square_list, iter):
     polynomial_list = []
     angle = [0, math.pi/2, 3*math.pi/2, math.pi]
@@ -202,47 +222,47 @@ if __name__ == "__main__":
     
     
     # Vertical Connect:
-    right_squares = integerify_square(translate(square_list, 0, 0, 2))
-    left_squares = integerify_square(translate(square_list, 0, 0, -2))
-    double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
-    # square_to_voxel(double_torus)
-    # print(len(double_torus))
-    double_torus = remove_repeat_squares(double_torus)
-    cube, _, _ = generate_cube(1, 1, 2)
-    double_torus += translate(cube, 4, -3, -1)
-    double_torus = remove_repeat_squares(double_torus)
+    # right_squares = integerify_square(translate(square_list, 0, 0, 2))
+    # left_squares = integerify_square(translate(square_list, 0, 0, -2))
+    # double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
+    # # square_to_voxel(double_torus)
+    # # print(len(double_torus))
+    # double_torus = remove_repeat_squares(double_torus)
+    # cube, _, _ = generate_cube(1, 1, 2)
+    # double_torus += translate(cube, 4, -3, -1)
+    # double_torus = remove_repeat_squares(double_torus)
     
-    double_torus += translate(cube, 2, -3, -1)
-    double_torus = remove_repeat_squares(double_torus)
+    # double_torus += translate(cube, 2, -3, -1)
+    # double_torus = remove_repeat_squares(double_torus)
     
-    c2, _, _ = generate_cube(10, 1, 1)
-    double_torus += translate(c2, 5, -3, -1)
-    double_torus = remove_repeat_squares(double_torus)
+    # c2, _, _ = generate_cube(10, 1, 1)
+    # double_torus += translate(c2, 5, -3, -1)
+    # double_torus = remove_repeat_squares(double_torus)
     
-    c3, _, _ = generate_cube(5, 5, 5)
-    double_torus += translate(c3, 15, -3, -1)
-    double_torus = remove_repeat_squares(double_torus)
+    # c3, _, _ = generate_cube(5, 5, 5)
+    # double_torus += translate(c3, 15, -3, -1)
+    # double_torus = remove_repeat_squares(double_torus)
     
     # square_to_voxel(double_torus)
     
     # Horiztonal Connect:
     
-    # right_squares = integerify_square(translate(square_list, 6, 0, 0))
-    # left_squares = integerify_square(translate(square_list, -6, 0, 0))
-    # double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
-    # # square_to_voxel(double_torus)
-    # # print(len(double_torus))
-    # double_torus = remove_repeat_squares(double_torus)
+    right_squares = integerify_square(translate(square_list, 6, 0, 0))
+    left_squares = integerify_square(translate(square_list, -6, 0, 0))
+    double_torus = remove_duplicate(right_squares) + remove_duplicate(left_squares)
+    # square_to_voxel(double_torus)
+    # print(len(double_torus))
+    double_torus = remove_repeat_squares(double_torus)
     
-    # # double_torus = scale_square(double_torus, 2)
+    # double_torus = scale_square(double_torus, 2)
     
-    # # -----------------------
-    # cube, _, _ = generate_cube(8, 1, 1)
-    # double_torus += translate(cube, -4, -6, -1)
-    # # double_torus += translate(cube, -4, 5, 0)
-    # # ------------------------
-    # # cube, _, _ = generate_cube(4, 1, 1)
-    # # double_torus += translate(cube, -2, 0, 1)
+    # -----------------------
+    cube, _, _ = generate_cube(8, 1, 1)
+    double_torus += translate(cube, -4, -6, -1)
+    # double_torus += translate(cube, -4, 5, 0)
+    # ------------------------
+    # cube, _, _ = generate_cube(4, 1, 1)
+    # double_torus += translate(cube, -2, 0, 1)
     
     double_torus = remove_repeat_squares(double_torus)
     square_to_voxel(double_torus)
@@ -275,6 +295,7 @@ if __name__ == "__main__":
         dt = translate(dt, a, b, c)
         dt = rotate_squares_theta(dt, random.choice(angle))
         dt = rotate_squares_phi(dt, random.choice(angle))
+        dt = rotate_squares_psi(dt, random.choice(angle))
         dt = integerify_square(dt)
         
         vert_dict = {}
@@ -296,7 +317,7 @@ if __name__ == "__main__":
             else:
                 type_dict[vertex_type] = 1
         
-        polynomial, variables = dict_to_polynomial(type_dict, -4)
+        polynomial, variables = dict_to_polynomial(type_dict, -2)
         file.write(polynomial)
     
     file.close()

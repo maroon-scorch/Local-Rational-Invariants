@@ -205,6 +205,10 @@ def remove_vertex(square_list, vertex):
         if vertex in sq.lst:
             index_list.append(idx)
             neighbor.append(sq)
+    
+    # square_to_voxel(neighbor)
+    
+    
     index_list.reverse()
     for i in index_list:
         square_list.pop(i)
@@ -252,6 +256,7 @@ def remove_vertex(square_list, vertex):
     
     return square_list
     # print(neighbor)
+
 
 def scale_square_xyz(square_list, x_factor, y_factor, z_factor):    
     output = []
@@ -319,40 +324,43 @@ def load_squares(input_file):
 if __name__ == "__main__":
     
     input_file = sys.argv[1]
+    square_list, vertice, center = load_squares(input_file)
+    
+    square_list = remove_vertex(square_list, Point3(-3, -1, -1))
     
     # square_to_voxel(square_list)
     
-    file = open("temp1.txt", "w+")
-    iter = 1
-    for i in range(iter):
-        print("Iteration: ", i)
-        square_list, vertice, center = load_squares(input_file)
-        vertex = random.choice(vertice)
-        square_list = remove_vertex(square_list, vertex)
-        square_to_voxel(square_list)
-        # square_list = scale_square_xyz(square_list, random.randint(2, 5))
-        rigid_polynomials = apply_rigid_motion(square_list, 8, 0)
-        for r in rigid_polynomials:
-           file.write(r)
+    # file = open("temp1.txt", "w+")
+    # iter = 100
+    # for i in range(iter):
+    #     print("Iteration: ", i)
+    #     square_list, vertice, center = load_squares(input_file)
+    #     vertex = random.choice(vertice)
+    #     square_list = remove_vertex(square_list, vertex)
+    #     # square_to_voxel(square_list)
+    #     # square_list = scale_square_xyz(square_list, random.randint(2, 5))
+    #     # rigid_polynomials = apply_rigid_motion(square_list, 8, 0)
+    #     # for r in rigid_polynomials:
+    #     #    file.write(r)
         
-        vert_dict = {}
-        for sq in square_list:
-            append_item_alt(vert_dict, sq)
+    #     vert_dict = {}
+    #     for sq in square_list:
+    #         append_item_alt(vert_dict, sq)
         
-        type_dict = {}
-        for k in vert_dict.keys():
-            order_list = vert_link(k, vert_dict[k])
-            vertex_type = order_to_string(order_list)
+    #     type_dict = {}
+    #     for k in vert_dict.keys():
+    #         order_list = vert_link(k, vert_dict[k])
+    #         vertex_type = order_to_string(order_list)
             
-            if vertex_type in type_dict:
-                type_dict[vertex_type] += 1
-            else:
-                type_dict[vertex_type] = 1
+    #         if vertex_type in type_dict:
+    #             type_dict[vertex_type] += 1
+    #         else:
+    #             type_dict[vertex_type] = 1
         
-        # print(type_dict)
+    #     # print(type_dict)
             
-        polynomial, variables = dict_to_polynomial(type_dict, 0)
-        # print(polynomial)
-        file.write(polynomial)
+    #     polynomial, variables = dict_to_polynomial(type_dict, 0)
+    #     # print(polynomial)
+    #     file.write(polynomial)
     
-    file.close()
+    # file.close()

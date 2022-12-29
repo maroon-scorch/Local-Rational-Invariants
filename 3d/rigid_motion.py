@@ -65,6 +65,15 @@ def rotate_phi(array, phi):
     new_point[2] = original_point[1]*math.sin(phi) + original_point[2]*math.cos(phi)
     
     return np.asarray(new_point)
+
+def rotate_psi(array, phi):
+    original_point = array.tolist()
+    new_point = array.tolist()
+    
+    new_point[0] = original_point[0]*math.cos(phi) - original_point[1]*math.sin(phi)
+    new_point[1] = original_point[0]*math.sin(phi) + original_point[1]*math.cos(phi)
+    
+    return np.asarray(new_point)
     
     
 def integerify_square(squares):
@@ -96,6 +105,17 @@ def rotate_squares_phi(square_list, phi):
         
     return new_squares
 
+def rotate_squares_psi(square_list, psi):
+    new_squares = []
+    for sq in square_list:
+        s1 = to_point(rotate_psi(sq.p1.vec, psi))
+        s2 = to_point(rotate_psi(sq.p2.vec, psi))
+        s3 = to_point(rotate_psi(sq.p3.vec, psi))
+        s4 = to_point(rotate_psi(sq.p4.vec, psi))
+        new_squares.append(Square(s1, s2, s3, s4))
+        
+    return new_squares
+
 def apply_rigid_motion(square_list, iter, num):
     polynomial_list = []
     angle = [0, math.pi/2, 3*math.pi/2, math.pi]
@@ -107,6 +127,7 @@ def apply_rigid_motion(square_list, iter, num):
         square_list = translate(square_list, a, b, c)
         square_list = rotate_squares_theta(square_list, random.choice(angle))
         square_list = rotate_squares_phi(square_list, random.choice(angle))
+        square_list = rotate_squares_psi(square_list, random.choice(angle))
         square_list = integerify_square(square_list)
         
         
@@ -149,6 +170,7 @@ if __name__ == "__main__":
         square_list = translate(square_list, a, b, c)
         square_list = rotate_squares_theta(square_list, random.choice(angle))
         square_list = rotate_squares_phi(square_list, random.choice(angle))
+        square_list = rotate_squares_psi(square_list, random.choice(angle))
         square_list = integerify_square(square_list)
         
         

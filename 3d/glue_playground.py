@@ -3,7 +3,7 @@ from point3 import *
 import math, itertools, random, sys
 import numpy as np
 from euler import vert_link, order_to_string, dict_to_polynomial
-from corner_cube import point_cloud_to_squares, generate_cube
+from corner_cube import point_cloud_to_squares, generate_cube, remove_vertex
 
 def append_item_alt(dict, square):
     points = square.lst
@@ -147,6 +147,127 @@ def scale_square(square_list, factor):
     output = integerify_square(output)
     return output
 
+
+# --------------------------------------
+# Removing a vertex
+
+def sq_to_axis(square):
+    """ Given a square on the grid, find out which axis it is perpendicular to:
+    0 - x, 1 - y, 2 - z"""
+    point, center = square.p1.vec, square.p3.vec
+    diff = (center - point).tolist()
+    for idx, elt in enumerate(diff):
+        if elt == 0:
+            return idx
+
+def push_square(square, axis, direction):
+    vector = [0, 0, 0]
+    vector[axis] = direction[axis]
+    vector = np.asarray(vector)
+        
+    s1 = to_point(square.p1.vec + vector)
+    s2 = to_point(square.p2.vec + vector)
+    s3 = to_point(square.p3.vec + vector)
+    s4 = to_point(square.p4.vec + vector)
+    
+    return Square(s1, s2, s3, s4)
+
+def is_vertex_problematic(vertex, squares):
+    # print("Vertex: ", vertex)
+    vert = vertex.vec
+    # print(squares)
+    
+    # List of opposite edges - if ordered properly
+    # this will be the link to the vertex
+    edges = []
+    for sq in squares:
+        center = sq.center.vec
+        opp_vert = 2*(center - vert) + vert
+        
+        # Find neighboring vertex of opp_vert
+        neighbors = []
+        sign_vector = np.sign(vert - center).tolist()
+        for idx, sign in enumerate(sign_vector):
+            if sign != 0:
+                dir = np.zeros((3,))
+                dir[idx,] = sign
+                new_pt = opp_vert + dir
+                neighbors.append(new_pt)
+        
+        assert len(neighbors) == 2 
+        edges.append([neighbors[0].tolist(), opp_vert.tolist()])
+        edges.append([neighbors[1].tolist(), opp_vert.tolist()])
+    
+    # Unordered list of edges in the sink, retreiving its vertices
+    vert_dict = {}
+    for start, end in edges:
+        key_s = str(start)
+        key_e = str(end)
+        if key_s in vert_dict:
+            vert_dict[key_s][1].add(to_point(end))
+        else:
+            vert_dict[key_s] = (start, {to_point(end)})
+        if key_e in vert_dict:
+            vert_dict[key_e][1].add(to_point(start))
+        else:
+            vert_dict[key_e] = (end, {to_point(start)})
+    # print("Dictionary: ", vert_dict)
+    for key in vert_dict.keys():
+        if len(vert_dict[key][1]) != 2:
+            return True
+    return False
+
+def remove_vertex_local(square_list, vertex, direction):
+    neighbor = []
+    index_list = []
+    for idx, sq in enumerate(square_list):
+        if vertex in sq.lst:
+            index_list.append(idx)
+            neighbor.append(sq)
+    
+    index_list.reverse()
+    for i in index_list:
+        square_list.pop(i)
+    
+    print(direction)
+    square_to_voxel(neighbor)
+    
+    for sq in neighbor:
+        axis = sq_to_axis(sq)
+        square_list.append(push_square(sq, axis, direction))
+    
+    square_to_voxel(square_list)
+    
+    for i in range(2):
+        vert_dict = {}
+        for sq in square_list:
+            append_item_alt(vert_dict, sq)
+        
+        problematic_vertice = []
+        for v in vert_dict.keys():
+            if is_vertex_problematic(v, vert_dict[v]):
+                problematic_vertice.append(v)
+        
+        # problematic_vertice = find_problematic_vertice(square_list)
+        # Potentially faulty, need to check later    
+        problematic_squares = point_cloud_to_squares(problematic_vertice)
+        for sq in problematic_squares:
+            if sq in square_list:
+                square_list = [square for square in square_list if square != sq]
+            else:
+                square_list.append(sq)
+    
+    # if find_problematic_vertice(square_list) != []:
+    #     print(vertex)
+    #     print(direction)
+    #     square_to_voxel(square_list)
+    
+    # assert find_problematic_vertice(square_list) == []
+    
+    
+    return square_list
+    # print(neighbor)
+
 if __name__ == "__main__":
     angle = [0, math.pi/2, 3*math.pi/2, math.pi]
     
@@ -159,15 +280,15 @@ if __name__ == "__main__":
     squares = []
     
     # Crystal Structure
-    for i in range(10):
-        squares += translate(hedge, i, 0, 0)
-        squares = remove_repeat_squares(squares)
-    for i in range(10):
-        squares += translate(h2, 1, i, -1)
-        squares = remove_repeat_squares(squares)
-    for i in range(10):
-        squares += translate(h3, 1, 1, i)
-        squares = remove_repeat_squares(squares)
+    # for i in range(10):
+    #     squares += translate(hedge, i, 0, 0)
+    #     squares = remove_repeat_squares(squares)
+    # for i in range(10):
+    #     squares += translate(h2, 1, i, -1)
+    #     squares = remove_repeat_squares(squares)
+    # for i in range(10):
+    #     squares += translate(h3, 1, 1, i)
+    #     squares = remove_repeat_squares(squares)
     
     # squares += translate(hedge, 0, 0, 0)
     # squares = remove_repeat_squares(squares)
@@ -245,7 +366,16 @@ if __name__ == "__main__":
     #     for j in range(i):
     #         squares += translate(h3, i, 0, j)
     #         squares = remove_repeat_squares(squares)
-    
+            
+    # for i in range(11):
+    #     squares += translate(h3, i, 0, i)
+    #     squares = remove_repeat_squares(squares)
+    #     squares += translate(h3, i, 0, i+1)
+    #     squares = remove_repeat_squares(squares)
+    # squares += translate(h2, 1, 2, 0)
+    # squares = remove_repeat_squares(squares)
+    # squares += translate(hedge, 10, 2, 0)
+    # squares = remove_repeat_squares(squares)
     # squares += translate(h3, 9, 1, 0)
     # squares = remove_repeat_squares(squares)
     
@@ -268,8 +398,108 @@ if __name__ == "__main__":
     # # squares += translate(unit, 1, 1, 1)
     # squares = remove_repeat_squares(squares)
     
+    # Torus with corner digged
+    # r1, _, _ = generate_cube(3, 1, 1)
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # squares += r1 + translate(r1, 0, 2, 0)
+    # # squares = remove_repeat_squares(squares)
+    # squares += translate(unit, 0, 1, 0) + translate(unit, 2, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(unit, 0, 0, 1) + translate(unit, 2, 0, 1) + translate(unit, 0, 2, 1) + translate(unit, 2, 2, 1)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(unit, 1, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    # squares = scale_square(squares, 2)
+    # square_to_voxel(squares)
+    # squares = remove_vertex_local(squares, Point3(2, 2, 0), np.asarray([-1, -1, 1]))
     
     
+    # Stacking a torus inside and out
+    # unit, _, _ = generate_cube(1, 1, 1)
+    
+    # r1, _, _ = generate_cube(3, 1, 1)
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # squares += r1 + translate(r1, 0, 2, 0)
+    # squares = remove_repeat_squares(squares)
+    # squares += translate(unit, 0, 1, 0) + translate(unit, 2, 1, 0)
+    # squares = remove_repeat_squares(squares)
+    
+    # squares = scale_square(squares, 3)
+    # squares = remove_repeat_squares(squares)
+    
+    # r2, _, _ = generate_cube(1, 1, 2)
+    # # squares += translate(r2,3, 3, 1)
+    # squares += translate(r2, 4, 3, 2)
+    # squares += translate(r2, 4, 4, 2)
+    # # squares += translate(r2, 4, 5, 2)
+    # # squares += translate(r2, 3, 4, 2)
+    # # squares += translate(r2, 5, 4, 2)
+    # squares += translate(r2, 3, 4, 2)
+    # # squares += translate(r2, 3, 5, 2)
+    # # squares += translate(r2, 5, 3, 2)
+    # # squares += translate(r2, 5, 5, 2)
+    # squares = remove_repeat_squares(squares)
+    
+    # Punctured Ball
+    # c3, _, _ = generate_cube(3, 3, 3)
+    # c5, _, center = generate_cube(4, 5, 4)
+    # unit, _, _ = generate_cube(1, 1, 1)
+    
+    # squares += c5 # + translate(c3, 1, 1, 1)
+    # squares = remove_repeat_squares(squares)
+
+    # for i in range(3):
+    #     vert_dict = {}
+    #     for sq in squares:
+    #         append_item_alt(vert_dict, sq)
+    #     squares = remove_vertex(squares, random.choice(list(vert_dict.keys())), center)
+    
+    # c3, _, _ = generate_cube(1, 5, 5)
+    # c4, _, _ = generate_cube(1, 5, 2)
+    # c5, _, _ = generate_cube(2, 1, 1)
+    # c6, _, _ = generate_cube(1, 1, 7)
+    # squares += c3
+    # squares += translate(c3, 1, 0, 4)
+    # squares += translate(c4, 1, 5, 4)
+    # squares += translate(c5, 1, 1, 0)
+    # squares += translate(c6, 2, 0, 0)
+    
+    # squares = remove_repeat_squares(squares)
+    
+    # -----------------------------
+    # Twisted Torus
+    # squares += translate(hedge, -1, 1, 0)
+    # squares += translate(hedge, 5, 0, 0)
+    
+    # squares += translate(h2, 3, -1, 0)
+    # squares += translate(h2, 0, 1, 7)
+    
+    # d, _, _ = generate_cube(1, 4, 8)
+    
+    # squares = remove_repeat_squares(squares)
+    
+    # squares += translate(d, 10, -2, 3)
+    # squares = remove_repeat_squares(squares)
+    
+    # -------------
+    # Torus with hole at same direction
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # c3, _, _ = generate_cube(3, 3, 3)
+    # c5, _, _ = generate_cube(5, 5, 5)
+    
+    # squares += translate(c3, 1, 1, 1) + c5
+    # squares += translate(unit, 1, 2, 4)
+    # squares += translate(unit, 3, 3, 4)
+    # squares = remove_repeat_squares(squares)
+    
+    squares += h2 + translate(h3, 0, 1, 0)
+    squares = remove_repeat_squares(squares)
+    
+    # squares += translate(h2, -9, 0, 1) + translate(h3, 0, -10, 1)
+    squares += translate(h2, -6, 3, 1) + translate(h3, 3, -7, 1)
+    squares = remove_repeat_squares(squares)
     square_to_voxel(squares)
 
 
@@ -277,10 +507,6 @@ if __name__ == "__main__":
     for i in range(1):
         print("Iteration: ", i)
         dt = translate(squares, 0, 0, 0)
-        
-        vert_dict = {}
-        for sq in dt:
-            append_item_alt(vert_dict, sq)
         
         vert_dict = {}
         for sq in dt:

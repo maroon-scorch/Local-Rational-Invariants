@@ -181,18 +181,18 @@ if __name__ == "__main__":
     
     double_torus = remove_repeat_squares(double_torus)
     
-    d2 = integerify_square(translate(double_torus, 0, 10, 0))
+    d2 = integerify_square(translate(double_torus, 10, 10, 0))
     double_torus += d2
     double_torus = remove_repeat_squares(double_torus)
     
-    a = random.randint(-10, 10)
-    b = random.randint(-10, 10)
-    c = random.randint(-10, 10)
+    # a = random.randint(-10, 10)
+    # b = random.randint(-10, 10)
+    # c = random.randint(-10, 10)
         
-    double_torus = translate(double_torus, a, b, c)
-    double_torus = rotate_squares_theta(double_torus, random.choice(angle))
-    double_torus = rotate_squares_phi(double_torus, random.choice(angle))
-    double_torus = integerify_square(double_torus)
+    # double_torus = translate(double_torus, a, b, c)
+    # double_torus = rotate_squares_theta(double_torus, random.choice(angle))
+    # double_torus = rotate_squares_phi(double_torus, random.choice(angle))
+    # double_torus = integerify_square(double_torus)
     
     # print(len(double_torus))
     
