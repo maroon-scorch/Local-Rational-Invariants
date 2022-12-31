@@ -494,12 +494,59 @@ if __name__ == "__main__":
     # squares += translate(unit, 3, 3, 4)
     # squares = remove_repeat_squares(squares)
     
-    squares += h2 + translate(h3, 0, 1, 0)
+    # f, _, _ = generate_cube(3, 10, 1)
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # squares += translate(h3, 0, 0, 1) # + translate(h3, 2, 0, 1)
+    # squares += translate(unit, 0, 0, 0) + translate(unit, 0, 2, 0) + translate(unit, 0, 4, 0) + translate(unit, 0, 6, 0) + translate(unit, 0, 8, 0)
+    # squares += translate(h3, 1, 0, 0)
+    # squares += translate(h3, 1, 0, 1)
+    # squares = remove_repeat_squares(squares)
+    # squares = remove_repeat_squares(squares)
+    
+    
+    # CASTLE
+    # base, _, _ = generate_cube(5, 5, 1)
+    # g, _, _ = generate_cube(3, 3, 1)
+    
+    # squares += base + translate(g, 1, 1, 1)
+    # squares = remove_repeat_squares(squares)
+    
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # squares += translate(unit, 1, 1, 2)
+    # squares += translate(unit, 3, 1, 2)
+    # squares += translate(unit, 1, 3, 2)
+    # squares += translate(unit, 3, 3, 2)
+    # squares = remove_repeat_squares(squares)
+    
+    ## Tunnel
+    base, _, _ = generate_cube(5, 5, 1)
+    unit, _, _ = generate_cube(1, 1, 1)
+    
+    trench = unit + translate(unit, 1, 0, 0) + translate(unit, 1, 1, 0) + translate(unit, 1, 2, 0) + translate(unit, 0, 2, 0)
+    trench = remove_repeat_squares(trench)
+    
+    t1 = trench + translate(unit, 0, 1, 0)
+    t1 = remove_repeat_squares(t1)
+    # g, _, _ = generate_cube(3, 3, 1)
+    
+    squares += base + translate(base, 0, 0, 10)
+    # for i in range(1, 3):
+    #     squares += translate(t1, 1, 1, i)
+    # for i in range(3, 6):
+    #     squares += translate(trench, 1, 1, i)
+    # for i in range(6, 8):
+    #     squares += translate(t1, 1, 1, i)
+    for i in range(1, 10):
+        squares += translate(trench, 1, 1, i)
     squares = remove_repeat_squares(squares)
     
-    # squares += translate(h2, -9, 0, 1) + translate(h3, 0, -10, 1)
-    squares += translate(h2, -6, 3, 1) + translate(h3, 3, -7, 1)
-    squares = remove_repeat_squares(squares)
+    # unit, _, _ = generate_cube(1, 1, 1)
+    # squares += translate(unit, 1, 1, 2)
+    # squares += translate(unit, 3, 1, 2)
+    # squares += translate(unit, 1, 3, 2)
+    # squares += translate(unit, 3, 3, 2)
+    # squares = remove_repeat_squares(squares)
+    
     square_to_voxel(squares)
 
 
