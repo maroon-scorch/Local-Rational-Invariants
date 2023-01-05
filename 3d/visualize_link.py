@@ -30,7 +30,8 @@ def link_to_edges(order_list):
     return edges
 
 if __name__ == "__main__":
-    order_list = [6,2,3,5,5,4,4,6,1,3]
+    # x_524623316415
+    order_list = [5,2,4,6,2,3,3,1,6,4,1,5]
     opposite = [3, 2, 6, 4, 1, 5]
     edges = link_to_edges(order_list)
     visualize_edges_lst(edges)

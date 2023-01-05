@@ -10,11 +10,12 @@ import matplotlib.colors as colors
 import sys
 from point3 import *
 from surface import Trig, square_to_voxel, visualize_edges_lst
+from euler import vert_link, symmetrize_polynomials_alt
 from generate import *
     
 # Run program using 'python main.py [directory to file]'
 def read_input(inputFile):
-    """ Read and parse the input file, returning the list of points and its dimension """
+    """ Read and parse the input file, returning the list of triangles and its dimension """
     trig_list = []
     with open(inputFile, "r") as f:
         dimension = int(f.readline())
@@ -60,89 +61,89 @@ def directions(vec):
     else:
         return 100
 
-def vert_link(vertex, squares):
-    """ Finds the link of the vertex in the complex """
-    # print("Vertex: ", vertex)
-    vert = vertex.vec
-    # print(squares)
+# def vert_link(vertex, squares):
+#     """ Finds the link of the vertex in the complex """
+#     # print("Vertex: ", vertex)
+#     vert = vertex.vec
+#     # print(squares)
     
-    # List of opposite edges - if ordered properly
-    # this will be the link to the vertex
-    edges = []
-    for sq in squares:
-        center = sq.center.vec
-        opp_vert = 2*(center - vert) + vert
+#     # List of opposite edges - if ordered properly
+#     # this will be the link to the vertex
+#     edges = []
+#     for sq in squares:
+#         center = sq.center.vec
+#         opp_vert = 2*(center - vert) + vert
         
-        # Find neighboring vertex of opp_vert
-        neighbors = []
-        sign_vector = np.sign(vert - center).tolist()
-        for idx, sign in enumerate(sign_vector):
-            if sign != 0:
-                dir = np.zeros((3,))
-                dir[idx,] = sign
-                new_pt = opp_vert + dir
-                neighbors.append(new_pt)
+#         # Find neighboring vertex of opp_vert
+#         neighbors = []
+#         sign_vector = np.sign(vert - center).tolist()
+#         for idx, sign in enumerate(sign_vector):
+#             if sign != 0:
+#                 dir = np.zeros((3,))
+#                 dir[idx,] = sign
+#                 new_pt = opp_vert + dir
+#                 neighbors.append(new_pt)
         
-        assert len(neighbors) == 2 
-        edges.append([neighbors[0].tolist(), opp_vert.tolist()])
-        edges.append([neighbors[1].tolist(), opp_vert.tolist()])
+#         assert len(neighbors) == 2 
+#         edges.append([neighbors[0].tolist(), opp_vert.tolist()])
+#         edges.append([neighbors[1].tolist(), opp_vert.tolist()])
     
-    # Unordered list of edges in the sink, retreiving its vertices
-    vert_dict = {}
-    for start, end in edges:
-        key_s = str(start)
-        key_e = str(end)
-        if key_s in vert_dict:
-            vert_dict[key_s].append(end)
-        else:
-            vert_dict[key_s] = [start, end]
-        if key_e in vert_dict:
-            vert_dict[key_e].append(start)
-        else:
-            vert_dict[key_e] = [end, start]
+#     # Unordered list of edges in the sink, retreiving its vertices
+#     vert_dict = {}
+#     for start, end in edges:
+#         key_s = str(start)
+#         key_e = str(end)
+#         if key_s in vert_dict:
+#             vert_dict[key_s].append(end)
+#         else:
+#             vert_dict[key_s] = [start, end]
+#         if key_e in vert_dict:
+#             vert_dict[key_e].append(start)
+#         else:
+#             vert_dict[key_e] = [end, start]
             
-    vertices = [vert_dict[key][0] for key in vert_dict.keys()]
-    # print("Number of Vertices ", len(vertices))
-    order = [directions(np.asarray(vert) - vertex.vec) for vert in vertices]
-    # print(order)
-    min_index = order.index(min(order))
-    # print(min_index)
-    min_vertex = vertices[min_index]
-    # print("Start ", min_vertex)
+#     vertices = [vert_dict[key][0] for key in vert_dict.keys()]
+#     # print("Number of Vertices ", len(vertices))
+#     order = [directions(np.asarray(vert) - vertex.vec) for vert in vertices]
+#     # print(order)
+#     min_index = order.index(min(order))
+#     # print(min_index)
+#     min_vertex = vertices[min_index]
+#     # print("Start ", min_vertex)
     
-    next = min_vertex
-    path = [min_vertex]
-    # Make sure have traversed through the entire graph
-    while len(path) != len(vertices):
-        pathes = vert_dict[str(next)]
-        for dir in pathes:
-            if dir not in path:
-                path.append(dir)
-                next = dir
-                break
-    # This creates a proper traversal of the link
-    # print(path)
-    vec_path = []
-    for idx, vert in enumerate(path):
-        if idx != 0:
-            diff = np.asarray(vert) - np.asarray(path[idx - 1])
-            vec_path.append(diff)
-    vec_path.append(np.asarray(path[0]) - np.asarray(path[-1]))
-    # print(vec_path)
-    order_path = [directions(elt) for elt in vec_path]
-    # print(order_path)
-    # print("-------------------------------------------")
+#     next = min_vertex
+#     path = [min_vertex]
+#     # Make sure have traversed through the entire graph
+#     while len(path) != len(vertices):
+#         pathes = vert_dict[str(next)]
+#         for dir in pathes:
+#             if dir not in path:
+#                 path.append(dir)
+#                 next = dir
+#                 break
+#     # This creates a proper traversal of the link
+#     # print(path)
+#     vec_path = []
+#     for idx, vert in enumerate(path):
+#         if idx != 0:
+#             diff = np.asarray(vert) - np.asarray(path[idx - 1])
+#             vec_path.append(diff)
+#     vec_path.append(np.asarray(path[0]) - np.asarray(path[-1]))
+#     # print(vec_path)
+#     order_path = [directions(elt) for elt in vec_path]
+#     # print(order_path)
+#     # print("-------------------------------------------")
     
-    # Visualizing Link of Vertex
-    # ordered_link = []
-    # for idx, vert in enumerate(path):
-    #     if idx != len(path) - 1:
-    #         ordered_link.append([vert, path[idx + 1]])
-    #     else:
-    #         ordered_link.append([vert, path[0]])
-    # visualize_edges_lst(ordered_link)
+#     # Visualizing Link of Vertex
+#     # ordered_link = []
+#     # for idx, vert in enumerate(path):
+#     #     if idx != len(path) - 1:
+#     #         ordered_link.append([vert, path[idx + 1]])
+#     #     else:
+#     #         ordered_link.append([vert, path[0]])
+#     # visualize_edges_lst(ordered_link)
     
-    return order_path
+#     return order_path
 
 def order_to_string(order_list):
     output = ""
@@ -220,7 +221,7 @@ if __name__ == "__main__":
     print(polynomial)
     print(variables)
     print("-------------------------------")
-    polynomial_list, variables = symmetrize_polynomials(variables)
+    polynomial_list, variables = symmetrize_polynomials_alt(variables)
     for p in polynomial_list:
         print(p)
     print(variables_to_sage(variables))

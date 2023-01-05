@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 # Class representing a 2-dimensional point (should switch to a list later)
 class Point3:
@@ -21,6 +22,10 @@ class Point3:
 
     def __hash__(self):
       return hash((self.x, self.y, self.z))
+  
+    def to_string(self):
+        return str(self.x) + " " + str(self.y) + " " + str(self.z)
+        # return str(int(2*self.x)) + " " + str(int(2*self.y)) + " " + str(int(2*self.z))
   
     # def setCoordinate(self, new_x, new_y):
     #     self.x = new_x
@@ -61,6 +66,9 @@ def approx_contains(lst, point):
             return True
         
     return False
+
+def round_p3(p):
+    return Point3(int(round(p.x)), int(round(p.y)), int(round(p.z)))
 
 def midpoint_of(p1, p2):
     return Point3((p1.x + p2.x)/2, (p1.y + p2.y)/2, (p1.z + p2.z)/2)

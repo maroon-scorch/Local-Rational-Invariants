@@ -400,8 +400,13 @@ if __name__ == "__main__":
     triangle_to_voxel(mesh_triangles)
     
     sq_list = solve(mesh_triangles)
+    
+    file2 = open(r"example.txt", "w+") 
+    for sq in sq_list:
+        file2.write(sq.to_string() + "\n")
+    
     # debug_plot(mesh_triangles, pts, center)
-    square_to_voxel(sq_list)
+    # square_to_voxel(sq_list)
 
     
     # y_int = int_between(np.min(y), np.max(y))
