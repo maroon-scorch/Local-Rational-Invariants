@@ -248,7 +248,7 @@ if __name__ == "__main__":
         vertex = random.choice(vertice)
         square_list = remove_vertex(square_list, vertex, center)
         
-        # square_to_voxel(square_list)
+        square_to_voxel(square_list)
         rigid_polynomials = apply_rigid_motion(square_list, 8, 2)
         for r in rigid_polynomials:
            file.write(r)

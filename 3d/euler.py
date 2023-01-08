@@ -142,7 +142,7 @@ def vert_link(vertex, squares):
         assert False, "ERROR: The Vertex Link is not a Cycle Graph! --------------------------------------------"
 
     
-    # Alternating encoding of vertex:
+    # Alternating encoding of vertex (Spike):
     path.append(min_vertex)
     vec_path = []
     for v in path:
