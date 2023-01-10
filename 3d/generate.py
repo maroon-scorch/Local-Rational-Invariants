@@ -377,8 +377,8 @@ if __name__ == "__main__":
 
     # Torus
 
-    # mesh_3d = generate_mesh()
-    mesh_3d = generate_torus()
+    mesh_3d = generate_mesh()
+    # mesh_3d = generate_torus()
     # mesh_3d = potato_chip()
     m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
     mesh_triangles = []
@@ -387,23 +387,25 @@ if __name__ == "__main__":
         if not is_triangle_degenrate(trg):
             mesh_triangles.append(trg)
     
-    # file2 = open(r"example.txt", "w+") 
-    # for tri in mesh_triangles:
-    #     p1 = tri.p1
-    #     p2 = tri.p2
-    #     p3 = tri.p3
-    #     string = str(p1.x) + " " + str(p1.y) + " " +  str(p1.z)  + " " +  str(p2.x) + " " + str(p2.y) + " " + str(p2.z) + " " + str(p3.x) + " " + str(p3.y) + " " + str(p3.z)
-    #     file2.write(string + "\n")
-    # file2.close()
+    file2 = open(r"example.txt", "w+") 
+    for tri in mesh_triangles:
+        p1 = tri.p1
+        p2 = tri.p2
+        p3 = tri.p3
+        string = "{:.5f}".format(p1.x) + " " + "{:.5f}".format(p1.y) + " " +  "{:.5f}".format(p1.z)  + " " +  "{:.5f}".format(p2.x) + " " + "{:.5f}".format(p2.y) + " " + "{:.5f}".format(p2.z) + " " + "{:.5f}".format(p3.x) + " " + "{:.5f}".format(p3.y) + " " + "{:.5f}".format(p3.z)
+
+        # string = str(p1.x) + " " + str(p1.y) + " " +  str(p1.z)  + " " +  str(p2.x) + " " + str(p2.y) + " " + str(p2.z) + " " + str(p3.x) + " " + str(p3.y) + " " + str(p3.z)
+        file2.write(string + "\n")
+    file2.close()
     
     print("Number of Triangles: ", len(mesh_triangles))
-    triangle_to_voxel(mesh_triangles)
+    # triangle_to_voxel(mesh_triangles)
     
     sq_list = solve(mesh_triangles)
     
-    file2 = open(r"example.txt", "w+") 
-    for sq in sq_list:
-        file2.write(sq.to_string() + "\n")
+    # file2 = open(r"example.txt", "w+") 
+    # for sq in sq_list:
+    #     file2.write(sq.to_string() + "\n")
     
     # debug_plot(mesh_triangles, pts, center)
     # square_to_voxel(sq_list)
