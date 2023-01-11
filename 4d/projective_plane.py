@@ -6,8 +6,60 @@
 # Run - python projective_plane.py pointn.py
 
 from pointn import *
-import sys, itertools
+import sys, itertools, timeit, time
 import scipy.linalg as la
+from threading import Thread
+from multiprocessing.pool import Pool
+from itertools import repeat
+epsilon = 0.0001
+
+class intersectionFinder(Thread):
+    def __init__(self, start, end, n, complex_list, kernel_list, output_list):  
+        Thread.__init__(self)
+        self.s = start
+        self.e = end
+        self.n = n
+        self.complex_list = complex_list
+        self.kernel_list = kernel_list
+        self.output_list = output_list
+        self.value = None
+
+    def find(self, complex, n, kernel, output_vectors):
+        point_list = []
+        linear_list = []
+        for c in complex:
+            matrix_append = []
+            output = []
+            for i in range(0, len(c)):
+                if type(c[i]) == type(0):
+                    entry = [0 for i in range(n)]
+                    entry[i] = 1
+                    matrix_append.append(entry)
+                    output.append(c[i])
+            
+            linear_list.append((matrix_append, output))
+
+        for i in range(self.s, self.e + 1):
+            # Iterating through the data of triangles
+            for j in range(0, len(linear_list)):
+                # Iterating through the data of complex
+                whole_matrix = np.array(linear_list[j][0] + kernel[i].tolist())
+                output = np.array(linear_list[j][1] + output_vectors[i].tolist())
+
+                if is_consistent(whole_matrix, output):
+                    intersection = np.linalg.solve(whole_matrix, output)
+                    # print("Intersection: ", intersection)
+                    if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                        point_list.append(intersection.tolist())
+        return point_list
+        
+    def run(self):
+        pts = []
+        for i in range(0, len(self.complex_list)):
+            intersections = self.find(self.complex_list[i], self.n, self.kernel_list, self.output_list)
+            pts += intersections
+
+        self.value = pts
 
 def read_input(inputFile):
     """ Read and parse the input file, returning the list of triangles """
@@ -104,12 +156,12 @@ def find_subcomplex(center, indices, moves):
     """ Given a center contained in a unit cube and number a, finds the n-a dimensional
     sub-faces of the cube. """
     cp = PointN(list(center))
-    print(cp)
+    # print(cp)
     output = []
     for index in indices:
         for m in moves:
             current = cp.vec.tolist()
-            print(current)
+            # print(current)
             for j in range(0, len(index)):
                 current_pos = list(index)[j]
                 current[current_pos] = m[j](current[current_pos])
@@ -143,6 +195,36 @@ def is_consistent(A, b):
     matrix = np.concatenate((A, B.T), axis=1)
     return np.linalg.matrix_rank(matrix) == np.linalg.matrix_rank(A)
 
+def find_intersection_alt(complex, n, kernel, output_vectors):
+    point_list = []
+    linear_list = []
+    for c in complex:
+        matrix_append = []
+        output = []
+        for i in range(0, len(c)):
+            if type(c[i]) == type(0):
+                entry = [0 for i in range(n)]
+                entry[i] = 1
+                matrix_append.append(entry)
+                output.append(c[i])
+        
+        linear_list.append((matrix_append, output))
+
+    for i in range(0, len(kernel)):
+        # Iterating through the data of triangles
+        for j in range(0, len(linear_list)):
+            # Iterating through the data of complex
+            whole_matrix = np.array(linear_list[j][0] + kernel[i].tolist())
+            output = np.array(linear_list[j][1] + output_vectors[i].tolist())
+
+            if is_consistent(whole_matrix, output):
+                intersection = np.linalg.solve(whole_matrix, output)
+                # print("Intersection: ", intersection)
+                if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                    point_list.append(intersection.tolist())
+    
+    return point_list
+
 def find_intersection(trig_list, complex, n):
     point_list = []
 
@@ -162,7 +244,7 @@ def find_intersection(trig_list, complex, n):
     # The matrix defining the complex should be the basis vectors 
     # of the kernel, we can optimize this later
 
-    print(linear_list)
+    # print(linear_list)
     for tri in trig_list:
         trig_vectors = []
         output_vectors = []
@@ -170,27 +252,31 @@ def find_intersection(trig_list, complex, n):
             current_vec = (tri[i].vec - tri[0].vec).tolist()
             trig_vectors.append(current_vec)
 
-        print("Complex: ", trig_vectors)
+        # print("Complex: ", trig_vectors)
         kernel = nullspace(np.array(trig_vectors))
-        print("Kernel: ", kernel)
+        # print("Kernel: ", kernel)
         output_vectors = np.dot(kernel, tri[0].vec.T)
-        print("Output: ", output_vectors)
+        # print("Output: ", output_vectors)
         for j in range(0, len(linear_list)):
             whole_matrix = np.array(linear_list[j][0] + kernel.tolist())
             output = np.array(linear_list[j][1] + output_vectors.tolist())
-            print("Whole Matrix: ", whole_matrix)
-            print("Output: ", output)
+            # print("Whole Matrix: ", whole_matrix)
+            # print("Output: ", output)
             
             rref = find_rref(whole_matrix, output)
             
-            print(rref)
-            last_column = rref[-1]
-            print(last_column)
+            # print(rref)
+            # last_column = rref[-1]
+            # print(last_column)
 
             if is_consistent(whole_matrix, output):
                 intersection = np.linalg.solve(whole_matrix, output)
-                print("Intersection: ", intersection)
-            
+                # print("Intersection: ", intersection)
+
+                if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                    point_list.append(intersection.tolist())
+    
+    return point_list
             # if np.linalg.norm(last_column[:-1]) < 0.0000001 and np.abs(last_column[-1]) > 0.0000001:
             #     # This equation has no solution
             #     print("No intersection")
@@ -230,33 +316,77 @@ def solve(trig_list, n, k):
             # Attempt to optimize by doing the computation once
             indices = list(itertools.combinations(range(0, n), (k-1)))
 
-            print(list(indices))
+            # print(list(indices))
             # The shifts 
             up = lambda x: math.ceil(x)
             down = lambda x: math.floor(x)
             moves = list(itertools.product([up, down], repeat=(k-1)))
 
             for c in centers:
-                print("Center ", c)
+                # print("Center ", c)
                 c_complex = find_subcomplex(c, indices, moves)
                 complex_list.append(c_complex)
 
         # print(complex_list)
-        print(len(complex_list))
+        # Finding intersections:
+        print("--------------------- Finding Intersections ---------")
+        # print(len(complex_list))
+
+        kernel_list = []
+        output_list = []
+        for tri in trig_list:
+            trig_vectors = []
+            output_vectors = []
+            for i in range(1, len(tri)):
+                current_vec = (tri[i].vec - tri[0].vec).tolist()
+                trig_vectors.append(current_vec)
+            # print("Complex: ", trig_vectors)
+            kernel = nullspace(np.array(trig_vectors))
+            kernel_list.append(kernel)
+            # print("Kernel: ", kernel)
+            output_vectors = np.dot(kernel, tri[0].vec.T)
+            output_list.append(output_vectors)
 
         sq_list = []
         pts = []
-        for i in range(0, len(complex_list)):
-            intersections = find_intersection(trig_list, complex_list[i], n)
-            pts += intersections
-            # try:
-            #     intersections = find_intersection(trig_list, complex_list[i], n)
-            #     pts += intersections
-            #     # squares = intersection_to_squares(intersections, center[i])
-            #     # sq_list += squares
-            # except Exception as e:
-            #     print(e)
-            #     print("___________________________________________________")
+        # ---------------- Multiprocessing
+        N = 10
+        with Pool(N) as pool:
+            result = pool.starmap(find_intersection_alt, zip(complex_list, repeat(n), repeat(kernel_list), repeat(output_list)))
+
+
+        # ---------------- Multithreading
+        # N = 10
+        # cords = np.array_split(range(len(trig_list)), N)
+        # thread_list = []
+        # # Getting to here took about 0.06 seconds 
+        # for i in range(len(cords)):
+        #     # create a new thread
+        #     start = cords[i][0]
+        #     end = cords[i][-1]
+        #     thread = intersectionFinder(start, end, n, complex_list, kernel_list, output_list)
+        #     # start the thread
+        #     thread.start()
+        #     thread_list.append(thread)
+        
+        # # wait for the thread to finish
+        # for t in thread_list:
+        #     t.join()
+        #     data = t.value
+
+
+        # for i in range(0, len(complex_list)):
+        #     # intersections = find_intersection(trig_list, complex_list[i], n)
+        #     intersections = find_intersection_alt(complex_list[i], n, kernel_list, output_list)
+        #     pts += intersections
+        #     # try:
+        #     #     intersections = find_intersection(trig_list, complex_list[i], n)
+        #     #     pts += intersections
+        #     #     # squares = intersection_to_squares(intersections, center[i])
+        #     #     # sq_list += squares
+        #     # except Exception as e:
+        #     #     print(e)
+        #     #     print("___________________________________________________")
         print("---------------------Finished Finding Squares----------")
 
 
@@ -268,7 +398,11 @@ if __name__ == "__main__":
     triangles = read_input(input_file)
     print("Number of Triangles: ", len(triangles))
 
+    start = timeit.default_timer()
+    print("Start")
     solve(triangles, 3, 3)
+    stop = timeit.default_timer()
+    print('Time: ', stop - start)
 
     # x = lambda p: p[0]*p[1]
     # y = lambda p: p[0]*p[2]
