@@ -37,7 +37,15 @@ def dist(p1, p2):
     """ Given 2 points, find the distance between them """
     return np.linalg.norm(p2.vec - p1.vec)
 
+def max_dist(p1, p2):
+    """ Returns the L-infinity norm"""
+    return np.max(np.absolute(p2.vec - p1.vec))
+
 def midpoint_of(p1, p2):
     return to_point((p1.vec + p2.vec)/2)
+
+def translate(pt, vec):
+    assert len(pt) == len(vec)
+    return to_point(pt.vec + np.array(vec))
     
     
