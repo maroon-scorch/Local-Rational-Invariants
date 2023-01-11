@@ -7,6 +7,7 @@
 
 from pointn import *
 import sys, itertools
+import scipy.linalg as la
 
 def read_input(inputFile):
     """ Read and parse the input file, returning the list of triangles """
@@ -115,6 +116,32 @@ def find_subcomplex(center, indices, moves):
             output.append(tuple(current))
     return output
         
+# https://stackoverflow.com/questions/49852455/how-to-find-the-null-space-of-a-matrix-in-python-using-numpy
+def nullspace(A, atol=1e-13, rtol=0):
+    A = np.atleast_2d(A)
+    u, s, vh = np.linalg.svd(A)
+    tol = max(atol, rtol * s[0])
+    nnz = (s >= tol).sum()
+    # ns = vh[nnz:].conj().T
+    ns = vh[nnz:].conj()
+    return ns
+
+def find_rref(A, b):
+    #print(A)
+    #print(b)
+    B = np.reshape(b, (1, -1))
+    matrix = np.concatenate((A, B.T), axis=1)
+    #print(matrix)
+    (_, rref) = la.qr(matrix)
+    
+    return rref
+
+def is_consistent(A, b):
+    """ A linear system Ax = b has solution if and only if
+    (A|b) has the same rank as rank of A """
+    B = np.reshape(b, (1, -1))
+    matrix = np.concatenate((A, B.T), axis=1)
+    return np.linalg.matrix_rank(matrix) == np.linalg.matrix_rank(A)
 
 def find_intersection(trig_list, complex, n):
     point_list = []
@@ -132,20 +159,45 @@ def find_intersection(trig_list, complex, n):
         
         linear_list.append((matrix_append, output))
 
-    print(linear_list)
+    # The matrix defining the complex should be the basis vectors 
+    # of the kernel, we can optimize this later
 
-    # for tri in trig_list:
-    #     trig_vectors = []
-    #     output_vectors = []
-    #     for i in range(1, len(tri)):
-    #         current_vec = (tri[i].vec - tri[0].vec).tolist()
-    #         trig_vectors.append(current_vec)
-    #     for j in range(0, len(linear_list)):
-    #         whole_matrix = np.array(linear_list[j][0] + trig_vectors)
-    #         output = np.array(linear_list[j][1] + output_vectors)
-    #         print(output)
-            # intersection = np.linalg.solve(whole_matrix, output)
-            # print(intersection)
+    print(linear_list)
+    for tri in trig_list:
+        trig_vectors = []
+        output_vectors = []
+        for i in range(1, len(tri)):
+            current_vec = (tri[i].vec - tri[0].vec).tolist()
+            trig_vectors.append(current_vec)
+
+        print("Complex: ", trig_vectors)
+        kernel = nullspace(np.array(trig_vectors))
+        print("Kernel: ", kernel)
+        output_vectors = np.dot(kernel, tri[0].vec.T)
+        print("Output: ", output_vectors)
+        for j in range(0, len(linear_list)):
+            whole_matrix = np.array(linear_list[j][0] + kernel.tolist())
+            output = np.array(linear_list[j][1] + output_vectors.tolist())
+            print("Whole Matrix: ", whole_matrix)
+            print("Output: ", output)
+            
+            rref = find_rref(whole_matrix, output)
+            
+            print(rref)
+            last_column = rref[-1]
+            print(last_column)
+
+            if is_consistent(whole_matrix, output):
+                intersection = np.linalg.solve(whole_matrix, output)
+                print("Intersection: ", intersection)
+            
+            # if np.linalg.norm(last_column[:-1]) < 0.0000001 and np.abs(last_column[-1]) > 0.0000001:
+            #     # This equation has no solution
+            #     print("No intersection")
+            #     continue
+            # else:
+            #     intersection = np.linalg.solve(whole_matrix, output)
+            #     print("Intersection: ", intersection)
             # print(whole_matrix)
 
 # Trig list is really a list of n-dimensional triangles
