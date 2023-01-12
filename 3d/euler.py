@@ -304,6 +304,8 @@ def generate_s2(A, B):
     
     return mesh_triangles
 
+# Input: list of squares, num: euler characteristics
+
 def squares_to_polynomials(squares, num):
     vert_dict = {}
     for sq in squares:

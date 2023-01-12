@@ -44,6 +44,22 @@ def process_polynomial(input_file):
                 
     return coefficients, variables
 
+def var_len(length):
+    all_var = []
+    data = np.genfromtxt('variables.txt', delimiter=', ',dtype = str)
+
+    #with open('sage\alt_index\variables.txt', 'r') as file:
+    #data = file.read().split(',').strip()
+    for var in data:
+        if len(var[2:]) == length + 1:
+            all_var.append(var[2:])
+    num_var = len(all_var)
+    return all_var, num_var
+
+print(var_len(3))
+print(var_len(4))
+print(var_len(5))
+
 if __name__ == "__main__":
     
     input_file = sys.argv[1]
