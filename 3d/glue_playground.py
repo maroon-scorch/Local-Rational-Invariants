@@ -279,6 +279,12 @@ if __name__ == "__main__":
     
     squares = []
     
+    unit, _, _ = generate_cube(1, 1, 1)
+    squares = unit + translate(unit, 1, 0, 0)
+    # This is how you glue
+    squares = remove_repeat_squares(squares)
+    
+    
     # Crystal Structure
     # for i in range(10):
     #     squares += translate(hedge, i, 0, 0)
@@ -519,26 +525,26 @@ if __name__ == "__main__":
     # squares = remove_repeat_squares(squares)
     
     ## Tunnel
-    base, _, _ = generate_cube(5, 5, 1)
-    unit, _, _ = generate_cube(1, 1, 1)
+    # base, _, _ = generate_cube(5, 5, 1)
+    # unit, _, _ = generate_cube(1, 1, 1)
     
-    trench = unit + translate(unit, 1, 0, 0) + translate(unit, 1, 1, 0) + translate(unit, 1, 2, 0) + translate(unit, 0, 2, 0)
-    trench = remove_repeat_squares(trench)
+    # trench = unit + translate(unit, 1, 0, 0) + translate(unit, 1, 1, 0) + translate(unit, 1, 2, 0) + translate(unit, 0, 2, 0)
+    # trench = remove_repeat_squares(trench)
     
-    t1 = trench + translate(unit, 0, 1, 0)
-    t1 = remove_repeat_squares(t1)
-    # g, _, _ = generate_cube(3, 3, 1)
+    # t1 = trench + translate(unit, 0, 1, 0)
+    # t1 = remove_repeat_squares(t1)
+    # # g, _, _ = generate_cube(3, 3, 1)
     
-    squares += base + translate(base, 0, 0, 10)
-    # for i in range(1, 3):
-    #     squares += translate(t1, 1, 1, i)
-    # for i in range(3, 6):
+    # squares += base + translate(base, 0, 0, 10)
+    # # for i in range(1, 3):
+    # #     squares += translate(t1, 1, 1, i)
+    # # for i in range(3, 6):
+    # #     squares += translate(trench, 1, 1, i)
+    # # for i in range(6, 8):
+    # #     squares += translate(t1, 1, 1, i)
+    # for i in range(1, 10):
     #     squares += translate(trench, 1, 1, i)
-    # for i in range(6, 8):
-    #     squares += translate(t1, 1, 1, i)
-    for i in range(1, 10):
-        squares += translate(trench, 1, 1, i)
-    squares = remove_repeat_squares(squares)
+    # squares = remove_repeat_squares(squares)
     
     # unit, _, _ = generate_cube(1, 1, 1)
     # squares += translate(unit, 1, 1, 2)

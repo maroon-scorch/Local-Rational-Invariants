@@ -29,7 +29,7 @@ def index_to_squares(order_list):
 
 if __name__ == "__main__":
     order_list = [
-        [1,3,2,5,1],
+        [2,3,5,4,2],
     ]
     
     for i in range(len(order_list)):
