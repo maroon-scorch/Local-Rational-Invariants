@@ -46,7 +46,7 @@ def midpoint_of(p1, p2):
     return to_point((p1.vec + p2.vec)/2)
 
 def translate(pt, vec):
-    assert len(pt) == len(vec)
+    assert len(pt.points) == len(vec)
     return to_point(pt.vec + np.array(vec))
 
 def barycentric_coordinate(pt, simplex, tot_min=1e-9):
