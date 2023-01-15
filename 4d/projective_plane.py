@@ -195,7 +195,7 @@ def is_consistent(A, b):
     matrix = np.concatenate((A, B.T), axis=1)
     return np.linalg.matrix_rank(matrix) == np.linalg.matrix_rank(A)
 
-def find_intersection_alt(complex, n, kernel, output_vectors):
+def find_intersection_alt(complex, n, kernel, output_vectors, trig_list):
     point_list = []
     linear_list = []
     for c in complex:
@@ -220,71 +220,23 @@ def find_intersection_alt(complex, n, kernel, output_vectors):
             if is_consistent(whole_matrix, output):
                 intersection = np.linalg.solve(whole_matrix, output)
                 # print("Intersection: ", intersection)
-                if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                # if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                if is_point_in_simplex(to_point(intersection), trig_list[i]):
                     point_list.append(intersection.tolist())
     
     return point_list
 
-def find_intersection(trig_list, complex, n):
-    point_list = []
+def find_bound_on_trig(triangle, n):
+    """ Given a simplex in R^n, find the bound on the triangle """
+    # print(triangle)
+    bound = []
+    for i in range(0, n):
+        x_list = [p.points[i] for p in triangle]
+        x_list = np.array(x_list).flatten()
+        x_start, x_end = math.floor(np.min(x_list)), math.ceil(np.max(x_list))
+        bound.append((x_start, x_end))
 
-    linear_list = []
-    for c in complex:
-        matrix_append = []
-        output = []
-        for i in range(0, len(c)):
-            if type(c[i]) == type(0):
-                entry = [0 for i in range(n)]
-                entry[i] = 1
-                matrix_append.append(entry)
-                output.append(c[i])
-        
-        linear_list.append((matrix_append, output))
-
-    # The matrix defining the complex should be the basis vectors 
-    # of the kernel, we can optimize this later
-
-    # print(linear_list)
-    for tri in trig_list:
-        trig_vectors = []
-        output_vectors = []
-        for i in range(1, len(tri)):
-            current_vec = (tri[i].vec - tri[0].vec).tolist()
-            trig_vectors.append(current_vec)
-
-        # print("Complex: ", trig_vectors)
-        kernel = nullspace(np.array(trig_vectors))
-        # print("Kernel: ", kernel)
-        output_vectors = np.dot(kernel, tri[0].vec.T)
-        # print("Output: ", output_vectors)
-        for j in range(0, len(linear_list)):
-            whole_matrix = np.array(linear_list[j][0] + kernel.tolist())
-            output = np.array(linear_list[j][1] + output_vectors.tolist())
-            # print("Whole Matrix: ", whole_matrix)
-            # print("Output: ", output)
-            
-            rref = find_rref(whole_matrix, output)
-            
-            # print(rref)
-            # last_column = rref[-1]
-            # print(last_column)
-
-            if is_consistent(whole_matrix, output):
-                intersection = np.linalg.solve(whole_matrix, output)
-                # print("Intersection: ", intersection)
-
-                if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
-                    point_list.append(intersection.tolist())
-    
-    return point_list
-            # if np.linalg.norm(last_column[:-1]) < 0.0000001 and np.abs(last_column[-1]) > 0.0000001:
-            #     # This equation has no solution
-            #     print("No intersection")
-            #     continue
-            # else:
-            #     intersection = np.linalg.solve(whole_matrix, output)
-            #     print("Intersection: ", intersection)
-            # print(whole_matrix)
+    return bound
 
 # Trig list is really a list of n-dimensional triangles
 def solve(trig_list, n, k):
@@ -293,6 +245,10 @@ def solve(trig_list, n, k):
     # Assume n >= k - 1 and k != 0
     assert n >= k - 1 and k != 0
 
+    # for tri in trig_list:
+    #     bound = find_bound_on_trig(tri, n)
+    #     bound = [range(s, e + 1) for s, e in bound]
+    # return None
    
     if k == 1:
         output = []
@@ -351,8 +307,9 @@ def solve(trig_list, n, k):
         pts = []
         # ---------------- Multiprocessing
         N = 10
+        size = math.ceil(len(complex_list) / N) 
         with Pool(N) as pool:
-            result = pool.starmap(find_intersection_alt, zip(complex_list, repeat(n), repeat(kernel_list), repeat(output_list)))
+            result = pool.starmap(find_intersection_alt, zip(complex_list, repeat(n), repeat(kernel_list), repeat(output_list), repeat(trig_list)), chunksize=size)
 
 
         # ---------------- Multithreading
@@ -374,10 +331,9 @@ def solve(trig_list, n, k):
         #     t.join()
         #     data = t.value
 
-
+        # ---------------- Unparallelized version (good for debugging):
         # for i in range(0, len(complex_list)):
-        #     # intersections = find_intersection(trig_list, complex_list[i], n)
-        #     intersections = find_intersection_alt(complex_list[i], n, kernel_list, output_list)
+        #     intersections = find_intersection_alt(complex_list[i], n, kernel_list, output_list, trig_list)
         #     pts += intersections
         #     # try:
         #     #     intersections = find_intersection(trig_list, complex_list[i], n)
