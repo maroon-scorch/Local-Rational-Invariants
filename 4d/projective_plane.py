@@ -114,7 +114,7 @@ def triangle_area(a, b, c):
     v2 = c.vec - a.vec
     return 1/2*abs(np.linalg.norm(np.cross(v1, v2)))
 
-def center(p):
+def find_center(p):
     # Given a point p, assuming in general position, finds the center
     # of the unit voxel it is contained in
     point_list = p.points
@@ -195,7 +195,7 @@ def is_consistent(A, b):
     matrix = np.concatenate((A, B.T), axis=1)
     return np.linalg.matrix_rank(matrix) == np.linalg.matrix_rank(A)
 
-def find_intersection_alt(complex, n, kernel, output_vectors):
+def find_intersection_alt(complex, n, kernel, output_vectors, trig_list):
     point_list = []
     linear_list = []
     for c in complex:
@@ -220,14 +220,14 @@ def find_intersection_alt(complex, n, kernel, output_vectors):
             if is_consistent(whole_matrix, output):
                 intersection = np.linalg.solve(whole_matrix, output)
                 # print("Intersection: ", intersection)
-                if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                # if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+                if is_point_in_simplex(to_point(intersection), trig_list[i]):
                     point_list.append(intersection.tolist())
     
     return point_list
 
-def find_intersection(trig_list, complex, n):
+def find_intersection(complex, tri, n):
     point_list = []
-
     linear_list = []
     for c in complex:
         matrix_append = []
@@ -241,50 +241,69 @@ def find_intersection(trig_list, complex, n):
         
         linear_list.append((matrix_append, output))
 
-    # The matrix defining the complex should be the basis vectors 
-    # of the kernel, we can optimize this later
+    trig_vectors = []
+    output_vectors = []
+    for i in range(1, len(tri)):
+        current_vec = (tri[i].vec - tri[0].vec).tolist()
+        trig_vectors.append(current_vec)
+    # print("Complex: ", trig_vectors)
+    kernel = nullspace(np.array(trig_vectors))
+    # print("Kernel: ", kernel)
+    output_vectors = np.dot(kernel, tri[0].vec.T)
 
-    # print(linear_list)
-    for tri in trig_list:
-        trig_vectors = []
-        output_vectors = []
-        for i in range(1, len(tri)):
-            current_vec = (tri[i].vec - tri[0].vec).tolist()
-            trig_vectors.append(current_vec)
+    for j in range(0, len(linear_list)):
+        # Iterating through the data of complex
+        whole_matrix = np.array(linear_list[j][0] + kernel.tolist())
+        output = np.array(linear_list[j][1] + output_vectors.tolist())
 
-        # print("Complex: ", trig_vectors)
-        kernel = nullspace(np.array(trig_vectors))
-        # print("Kernel: ", kernel)
-        output_vectors = np.dot(kernel, tri[0].vec.T)
-        # print("Output: ", output_vectors)
-        for j in range(0, len(linear_list)):
-            whole_matrix = np.array(linear_list[j][0] + kernel.tolist())
-            output = np.array(linear_list[j][1] + output_vectors.tolist())
-            # print("Whole Matrix: ", whole_matrix)
-            # print("Output: ", output)
-            
-            rref = find_rref(whole_matrix, output)
-            
-            # print(rref)
-            # last_column = rref[-1]
-            # print(last_column)
+        if is_consistent(whole_matrix, output):
+            intersection = np.linalg.solve(whole_matrix, output)
+            intersection = to_point(intersection)
+            # print("Intersection: ", intersection)
+            # if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
+            if is_point_in_simplex(intersection, tri) and max_dist(intersection, PointN(complex[j])) <= 0.5 + epsilon:
+                point_list.append(intersection)
 
-            if is_consistent(whole_matrix, output):
-                intersection = np.linalg.solve(whole_matrix, output)
-                # print("Intersection: ", intersection)
-
-                if max_dist(to_point(intersection), PointN(list(complex[j]))) <= 1 + epsilon:
-                    point_list.append(intersection.tolist())
-    
     return point_list
-            # if np.linalg.norm(last_column[:-1]) < 0.0000001 and np.abs(last_column[-1]) > 0.0000001:
-            #     # This equation has no solution
-            #     print("No intersection")
-            #     continue
-            # else:
-            #     intersection = np.linalg.solve(whole_matrix, output)
-            #     print("Intersection: ", intersection)
-            # print(whole_matrix)
+
+def find_centers_on_trig(triangle, n):
+    """ Given a simplex in R^n, find the bound on the triangle """
+    # print(triangle)
+    centers = []
+    for i in range(0, n):
+        x_list = [p.points[i] for p in triangle]
+        x_list = np.array(x_list).flatten()
+        x_start, x_end = int_between(np.min(x_list), np.max(x_list))
+        x_cen = lst_to_mid(x_start, x_end)
+        centers.append(x_cen)
+
+    return centers
+
+def intersection_to_squares(center, intersections, n, k):
+    squares = []
+    print(len(intersections))
+    for p in intersections:
+        c = find_center(p)
+        diff = c.vec - center.vec
+
+        # print("p: ", p)
+        # print("c: ", c)
+        # print("Center: ", center)
+
+        idx = np.nonzero(diff)[0].tolist()
+        # This is exactly the construction of a Boolean Lattice
+        sq = [center]
+        for i in idx:
+            current_vec = [0 for i in range(n)]
+            current_vec[i] = diff[i]
+            new_pts = []
+            for s in sq:
+                new_pts.append(translate(s, current_vec))
+            sq = sq + new_pts
+        
+        squares.append(sq)
+
+    return squares
 
 # Trig list is really a list of n-dimensional triangles
 def solve(trig_list, n, k):
@@ -292,7 +311,35 @@ def solve(trig_list, n, k):
     # k is how many points each triangle has
     # Assume n >= k - 1 and k != 0
     assert n >= k - 1 and k != 0
+    indices = list(itertools.combinations(range(0, n), (k-1)))
+    up = lambda x: math.ceil(x)
+    down = lambda x: math.floor(x)
+    moves = list(itertools.product([up, down], repeat=(k-1)))
 
+    centers_record = {}
+
+    for tri in trig_list:
+        cen = find_centers_on_trig(tri, n)
+        centers = itertools.product(*cen)
+
+        for c in centers:
+            cpx = find_subcomplex(c, indices, moves)
+            pts = find_intersection(cpx, tri, n)
+            
+            key = PointN(c)
+            if key in centers_record:
+                centers_record[key].update(pts)
+            else:
+                centers_record[key] = set(pts)
+    
+    cr = list(centers_record.keys())
+    square_list = []
+    for c in cr[0:1]:
+        squares = intersection_to_squares(c, centers_record[c], n, k)
+        square_list += squares
+        # print(squares)
+
+    return square_list
    
     if k == 1:
         output = []
@@ -351,8 +398,9 @@ def solve(trig_list, n, k):
         pts = []
         # ---------------- Multiprocessing
         N = 10
+        size = math.ceil(len(complex_list) / N) 
         with Pool(N) as pool:
-            result = pool.starmap(find_intersection_alt, zip(complex_list, repeat(n), repeat(kernel_list), repeat(output_list)))
+            result = pool.starmap(find_intersection_alt, zip(complex_list, repeat(n), repeat(kernel_list), repeat(output_list), repeat(trig_list)), chunksize=size)
 
 
         # ---------------- Multithreading
@@ -374,10 +422,9 @@ def solve(trig_list, n, k):
         #     t.join()
         #     data = t.value
 
-
+        # ---------------- Unparallelized version (good for debugging):
         # for i in range(0, len(complex_list)):
-        #     # intersections = find_intersection(trig_list, complex_list[i], n)
-        #     intersections = find_intersection_alt(complex_list[i], n, kernel_list, output_list)
+        #     intersections = find_intersection_alt(complex_list[i], n, kernel_list, output_list, trig_list)
         #     pts += intersections
         #     # try:
         #     #     intersections = find_intersection(trig_list, complex_list[i], n)
