@@ -10,6 +10,7 @@ path_dict = {
     6: [0, 0, -1]
 }
 
+
 # How does one recover this...
 #def convert(var):
 #    result = "x_"
@@ -68,14 +69,25 @@ def convert_ver(old_var):
     old_var = old_var[2:]
     squares = list(zip(old_var[::2], old_var[1::2]))
     new_sqrs = []
-    for i in squares:
-        i = new_sqrs.extend([dir_transfer(list(i)[1]), list(i)[0]])
+    for i in range(len(squares)):
+        a = int(squares[i][1])
+        b = int(squares[i][0])
+        i = new_sqrs.extend([dir_transfer(a), b])
+
     new_index = [v for i, v in enumerate(new_sqrs) if i == 0 or v != new_sqrs[i-1]]
-    new_var = "x_" + str(new_index)
+    new_var = "x_"
+    for idx in new_index:
+        new_var += str(idx)
+
+
+    #print("---------------")
+    #print("Old: ", old_var)
+    #print("New: ", new_var)
+
     for var in data:
         if isCircular(new_var, var):
-            return var
-        
+            return var     
+
 def process_polynomial(input_file):
     coefficients = []
     variables = []
@@ -87,7 +99,7 @@ def process_polynomial(input_file):
                 t = term.strip()
                 print(t)
                 c, var = t.strip().split('*')
-                
+                print(var)
                 coefficients.append(int(c))
                 variables.append(convert_ver(var))
     
@@ -98,11 +110,11 @@ def process_polynomial(input_file):
     return new_polynomial              
 #    return coefficients, variables
 
-print(process_polynomial('jackpot.txt'))
+# print(process_polynomial('sage/jackpot.txt'))
 
 
 if __name__ == "__main__":
-    
     input_file = sys.argv[1]
+    # input_file = 'sage/jackpot.txt'
     process_polynomial(input_file)
     
