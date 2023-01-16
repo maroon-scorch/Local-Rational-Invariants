@@ -7,7 +7,9 @@ class PointN:
     def __init__(self, points):
         self.dim = len(points)
         assert self.dim > 0
+        # The list of coordinates of the point
         self.points = points
+        # Numpy Array representing the same point
         self.vec = np.array(points)
 
     def __repr__(self):
@@ -25,9 +27,11 @@ class PointN:
         return str(self.points)
 
 def to_point(array):
+    """ Converts a given 1d numpy array to a point """
     return PointN(array.tolist())
 
 def scale_point(pt, factor):
+    """ Scales a point by the given factor """
     return to_point(factor*pt.points)
 
 def unit_vector(vector):
@@ -35,17 +39,19 @@ def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 
 def dist(p1, p2):
-    """ Given 2 points, find the distance between them """
+    """ Given 2 points, find the L-2 distance between them """
     return np.linalg.norm(p2.vec - p1.vec)
 
 def max_dist(p1, p2):
-    """ Returns the L-infinity norm"""
+    """ Returns the L-infinity distance between the two points """
     return np.max(np.absolute(p2.vec - p1.vec))
 
 def midpoint_of(p1, p2):
+    """ Finds the midpoint of the given two points """
     return to_point((p1.vec + p2.vec)/2)
 
 def translate(pt, vec):
+    """ Translates the point by a constant vector """
     assert len(pt.points) == len(vec)
     return to_point(pt.vec + np.array(vec))
 
@@ -80,6 +86,7 @@ def barycentric_coordinate(pt, simplex, tot_min=1e-9):
     return output
 
 def is_point_in_simplex(pt, simplex):
+    """ Checks if a given point is contained in the given simplex """
     adjusted_pt = barycentric_coordinate(pt, simplex)
     return np.min(adjusted_pt) >= 0 and np.sum(adjusted_pt) <= 1
 
