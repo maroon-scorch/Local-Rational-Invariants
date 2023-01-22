@@ -79,8 +79,11 @@ def barycentric_coordinate(pt, simplex, tot_min=1e-9):
     # Alternatively, we could use the least square solution
     output, residual, _, _ = np.linalg.lstsq(matrix, answer, rcond=None)
     # print(residual)
-    if residual > tot_min:
-        return []
+    # if residual > tot_min:
+    #     return []
+    # print(residual)
+    # print(pt)
+    # print(simplex)
     assert residual <= tot_min
     last_cord = 1 - np.sum(output)
     output = np.append(output, last_cord)
@@ -88,14 +91,14 @@ def barycentric_coordinate(pt, simplex, tot_min=1e-9):
     
     return output
 
-def is_point_in_simplex(pt, simplex):
+def is_point_in_simplex(pt, simplex, tot_min=1e-9):
     """ Checks if a given point is contained in the given simplex """
     adjusted_pt = barycentric_coordinate(pt, simplex)
     
     if adjusted_pt == []:
         return False
     
-    return np.min(adjusted_pt) >= 0 and np.sum(adjusted_pt) <= 1
+    return np.min(adjusted_pt) >= -1*tot_min and np.sum(adjusted_pt) <= 1 + tot_min
 
 # p = PointN([0.4,0.5])
 # simplex = [PointN([0, 1]), PointN([1, 2]), PointN([1, 0])]

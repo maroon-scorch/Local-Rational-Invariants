@@ -598,15 +598,15 @@ def segment_cross_triangle(trg, start, end):
         return False, None
     elif vol_start == 0:
         # This is a grid point
-        # if is_point_in_simplex(start, trg):
-        if is_point_on_triangle(trg, start):
+        if is_point_in_simplex(start, trg):
+        # if is_point_on_triangle(trg, start):
             return True, start
         else:
             return False, None
     elif vol_end == 0:
         # This is a grid point
-        # if is_point_in_simplex(end, trg):
-        if is_point_on_triangle(trg, end):
+        if is_point_in_simplex(end, trg):
+        # if is_point_on_triangle(trg, end):
             return True, end
         else:
             return False, None
@@ -633,8 +633,18 @@ def segment_cross_triangle(trg, start, end):
             print("Shouldn't happen - same start and end")
             return False, None
         
-        if is_point_on_triangle(trg, output):
-        # if is_point_in_simplex(output, trg):
+        s1 = is_point_on_triangle(trg, output)
+        s2 = is_point_in_simplex(output, trg)
+        
+        if s1 != s2:
+            print("-------------------------")
+            print(output)
+            print(trg)
+            print(s1)
+            print(s2)
+            print(barycentric_coordinate(output, trg))
+        
+        if is_point_in_simplex(output, trg):
             return True, output
         else:
             return False, output
