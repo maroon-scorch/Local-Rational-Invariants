@@ -18,7 +18,7 @@ class PointN:
     def __eq__(self, other):
         if type(other) != PointN:
             return False
-        return self.points == other.points
+        return list(self.points) == list(other.points)
 
     def __hash__(self):
       return hash((tuple(self.points)))
@@ -78,6 +78,9 @@ def barycentric_coordinate(pt, simplex, tot_min=1e-9):
     
     # Alternatively, we could use the least square solution
     output, residual, _, _ = np.linalg.lstsq(matrix, answer, rcond=None)
+    # print(residual)
+    if residual > tot_min:
+        return []
     assert residual <= tot_min
     last_cord = 1 - np.sum(output)
     output = np.append(output, last_cord)
@@ -88,6 +91,10 @@ def barycentric_coordinate(pt, simplex, tot_min=1e-9):
 def is_point_in_simplex(pt, simplex):
     """ Checks if a given point is contained in the given simplex """
     adjusted_pt = barycentric_coordinate(pt, simplex)
+    
+    if adjusted_pt == []:
+        return False
+    
     return np.min(adjusted_pt) >= 0 and np.sum(adjusted_pt) <= 1
 
 # p = PointN([0.4,0.5])

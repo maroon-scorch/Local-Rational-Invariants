@@ -232,8 +232,8 @@ def generate_torus():
 
 def generate_mesh():
     r = 1.9
-    u = np.linspace(0, 2*np.pi, 10)
-    v = np.linspace(0, np.pi, 10)
+    u = np.linspace(0, 2*np.pi, 30)
+    v = np.linspace(0, np.pi, 30)
     
     # p: u, v
     f_x = lambda p: r*math.cos(p[0])*math.sin(p[1])
@@ -459,4 +459,4 @@ if __name__ == "__main__":
     #     squares = intersection_to_squares(intersections)
     #     sq_list += squares
         
-    # square_to_voxel(sq_list)
+    square_to_voxel(sq_list)
