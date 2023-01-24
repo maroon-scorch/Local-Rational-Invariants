@@ -28,6 +28,37 @@ def read_input(inputFile):
     
     return poly_points, dimension
 
+def read_input_edges(inputFile):
+    trig_list = []
+    
+    with open(inputFile, "r") as f:
+        first_line = f.readline().split()
+        n = int(first_line[0])
+        k = int(first_line[1])
+        
+        for line in f.readlines():
+            tokens = line.strip().split()
+            assert len(tokens) % n == 0
+            tokens = [float(elt) for elt in tokens]
+            
+            chunks = [tokens[i:i + n] for i in range(0, len(tokens), n)]
+            tri = []
+            for c in chunks:
+                current_point = Point(c[0], c[1])
+                tri.append(current_point)
+            assert len(tri) == k
+            trig_list.append(tri)
+            
+    vertex = []
+    for i in range(len(trig_list)):
+        if i != len(trig_list) - 1:
+            vertex.append(trig_list[i][0])
+        else:
+            vertex.append(trig_list[i][0])
+            
+    return vertex, (n, k)
+    
+
 def validate_input(points):
     """ Checks if the list of points matches the input specification
     """
@@ -37,10 +68,10 @@ def validate_input(points):
         sys.exit(0)
         
     # Every point needs to have one coordinate to be an integer
-    for pt in points:
-        if not isinstance(pt.x, int) and not isinstance(pt.y, int):
-            print("Error: " + str(pt) + " does not have integer coordinate")
-            sys.exit(0)
+    # for pt in points:
+    #     if not isinstance(pt.x, int) and not isinstance(pt.y, int):
+    #         print("Error: " + str(pt) + " does not have integer coordinate")
+    #         sys.exit(0)
             
     # Angle of any three consecutive points are 160-200 degree
     faulty_ver_list = bad_vertices(points)
@@ -402,7 +433,7 @@ def run(points, dimension, close):
     # print("This is a curve in dimension: ", dimension)
     # print("The list has length: ", len(points))
     # print("The list has points: ", points)
-    # visualize(points, "Raw Input", True)
+    visualize(points, "Raw Input", True)
     # Refine the inputs first
     refined_points = refine_input(points)
     refined_points = avoid_grid(refined_points)
@@ -432,7 +463,7 @@ def run(points, dimension, close):
     # visualize(solution, "Grid Approximation", False)
     solution = solve_half_length(refined_points)
     solution = remove_adjacent(scale_input(solution, 2))
-    # visualize(solution, "Title", False)
+    visualize(solution, "Title", False)
     return solution
     
     # solution = solve_halfLength(refined_points)
@@ -441,5 +472,6 @@ def run(points, dimension, close):
 # The main body of the code:
 if __name__ == "__main__":
     input_file = sys.argv[1]
-    points, dimension = read_input(input_file)
+    # points, dimension = read_input(input_file)
+    points, dimension = read_input_edges(input_file)
     run(points, dimension, True)

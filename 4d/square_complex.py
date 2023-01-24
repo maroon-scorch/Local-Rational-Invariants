@@ -95,15 +95,26 @@ def triangle_grid_to_voxel(trig_list, center, intersections):
 def read_input(inputFile):
     """ Read and parse the input file, returning the list of triangles """
     trig_list = []
+    
     with open(inputFile, "r") as f:
+        first_line = f.readline().split()
+        n = int(first_line[0])
+        k = int(first_line[1])
+        
         for line in f.readlines():
             tokens = line.strip().split()
-            p1 = PointN([float(tokens[0]), float(tokens[1]), float(tokens[2])])
-            p2 = PointN([float(tokens[3]), float(tokens[4]), float(tokens[5])])
-            p3 = PointN([float(tokens[6]), float(tokens[7]), float(tokens[8])])
-            tri = [p1, p2, p3]
+            assert len(tokens) % n == 0
+            tokens = [float(elt) for elt in tokens]
+            
+            chunks = [tokens[i:i + n] for i in range(0, len(tokens), n)]
+            print(chunks)
+            tri = []
+            for c in chunks:
+                current_point = PointN(c)
+                tri.append(current_point)
+            assert len(tri) == k
             trig_list.append(tri)
-    return trig_list
+    return trig_list, n, k
     # trig_list = []
     # with open(inputFile, "r") as f:
     #     for line in f.readlines():
@@ -689,15 +700,15 @@ def solve_3d(trig_list, n, k):
         center_set = itertools.product(*cen)
         # For each center of the unit voxels
         for c in center_set:
-            # Finds its subfaces
-            edges = find_edges_3d(c)
-            # Computes the intersection
-            pts = find_intersection_3d(tri, edges)
+            # # Finds its subfaces
+            # edges = find_edges_3d(c)
+            # # Computes the intersection
+            # pts = find_intersection_3d(tri, edges)
             
             # Finds its subfaces
-            # cpx = find_subcomplex(c, indices, moves)
-            # # Computes the intersection
-            # pts = find_intersection(cpx, tri, n)
+            cpx = find_subcomplex(c, indices, moves)
+            # Computes the intersection
+            pts = find_intersection(cpx, tri, n)
             
             # Put it in the dictionary
             key = PointN(c)
@@ -773,14 +784,24 @@ def square_to_string(sq):
 
 if __name__ == "__main__":
     input_file = sys.argv[1]
-    triangles = read_input(input_file)
-    # triangles = read_input_vertex(input_file)
+    triangles, n, k = read_input(input_file)
+    print(n, k)
     print("Number of Triangles: ", len(triangles))
-    # triangle_to_voxel(triangles)
     
-    triangle_grid_to_voxel(triangles, [1.5, 0.5, -2.5], [])
+    if (n, k) == (2, 2):
+        visualize_edges(triangles)
+    if (n, k) == (3, 3):
+        triangle_to_voxel(triangles)
+        # triangle_grid_to_voxel(triangles, [1.5, 0.5, -2.5], [])
     
-    input = []
+    for i in range(len(triangles)):
+        triangles[i][0].points[0] += 0.001
+        triangles[i][0].points[1] += -0.05
+        
+        triangles[i][1].points[0] += 0.001
+        triangles[i][1].points[1] += 0.05
+    
+    # input = []
     # for p1, p2, p3 in triangles:
     #     q1 = translate(p1, [0.01, 0.008, 0.006])
     #     q2 = translate(p2, [0.001, 0.1, 0.035])
@@ -792,19 +813,23 @@ if __name__ == "__main__":
 
     start = timeit.default_timer()
     print("Start")
-    square = solve_3d(triangles, 3, 3)
+    square = solve(triangles, n, k)
     stop = timeit.default_timer()
     print('Time: ', stop - start)
 
-    for sq in square:
-        temp = sq[2]
-        sq[2] = sq[3]
-        sq[3] = temp
+    if (n, k) == (2, 2):
+        visualize_edges(square)
+    
+    
+    if (n, k) == (3, 3):
+        for sq in square:
+            temp = sq[2]
+            sq[2] = sq[3]
+            sq[3] = temp
+
+        triangle_to_voxel(square)
 
     # file2 = open(r"square.txt", "w+") 
     # for sq in square:
     #     file2.write(square_to_string(sq) + "\n")
     # file2.close()
-
-    # print(square)
-    square_to_voxel(square)

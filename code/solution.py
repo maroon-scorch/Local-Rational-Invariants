@@ -230,14 +230,14 @@ def solve_half_length(points):
         grid_edge_list.append([Point(mid_x_1, mid_y_1), center])
         grid_edge_list.append([center, Point(mid_x_2, mid_y_2)])
         
-    faulty_edge_list = remove_edges(grid_edge_list)
-    while faulty_edge_list != []:
-        faulty_edge_list = remove_edges(grid_edge_list)
+    # faulty_edge_list = remove_edges(grid_edge_list)
+    # while faulty_edge_list != []:
+    #     faulty_edge_list = remove_edges(grid_edge_list)
 
     # for i, ed in enumerate(grid_edge_list):
     #     print(str(i) + ": " + str(ed))
 
-    # visualize_edges(grid_edge_list)
+    visualize_edges(grid_edge_list)
     grid_list = edges_to_vert(grid_edge_list)
     
     return grid_list

@@ -377,8 +377,8 @@ if __name__ == "__main__":
 
     # Torus
 
-    mesh_3d = generate_mesh()
-    # mesh_3d = generate_torus()
+    # mesh_3d = generate_mesh()
+    mesh_3d = generate_torus()
     # mesh_3d = potato_chip()
     m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
     mesh_triangles = []
