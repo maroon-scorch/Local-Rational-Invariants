@@ -40,7 +40,7 @@ t_z = lambda t: f_x(t)*math.sin(theta) + f_z(t)*math.cos(theta)
 f_x = lambda t: math.sin(t) + 2*math.sin(2*t)
 f_y = lambda t: math.cos(t) - 2*math.cos(2*t)
 f_z = lambda t: -math.sin(3*t)
-# points = custom_cuve(f_x, f_y, f_z, 0, 2*math.pi , 20, 30)
+points = custom_cuve(f_x, f_y, f_z, 0, 2*math.pi , 20, 30)
 
 # Spiral
 f_x = lambda t: math.cos(t)

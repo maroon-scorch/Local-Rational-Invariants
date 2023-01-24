@@ -91,6 +91,15 @@ def triangle_grid_to_voxel(trig_list, center, intersections):
         ax.scatter(p.points[0], p.points[1], p.points[2], c='#FF0000')
     
     plt.show()
+    
+def visualize_edges_3d(grid_edge_list):
+    ax = plt.figure().add_subplot(projection='3d')
+    for i, ed in enumerate(grid_edge_list):
+        start = ed[0].points
+        end = ed[1].points
+        ax.plot([start[0], end[0]], [start[1], end[1]], [start[2], end[2]], 'k-')
+        # plt.annotate(i, [(start.x + end.x)/2, (start.y + end.y)/2])
+    plt.show()
 
 def read_input(inputFile):
     """ Read and parse the input file, returning the list of triangles """
@@ -333,6 +342,10 @@ def find_intersection(complex, tri, n):
             value = np.linalg.matrix_rank(whole_matrix)
             
             # Finding the intersection, this should be unique.
+            # print("A: ", whole_matrix)
+            # print("b: ", output)
+            # print(tri)
+            # print(complex)
             intersection = np.linalg.solve(whole_matrix, output)
             intersection = to_point(intersection)
 
@@ -793,13 +806,15 @@ if __name__ == "__main__":
     if (n, k) == (3, 3):
         triangle_to_voxel(triangles)
         # triangle_grid_to_voxel(triangles, [1.5, 0.5, -2.5], [])
+    if (n, k) == (3, 2):
+        visualize_edges_3d(triangles)
     
-    for i in range(len(triangles)):
-        triangles[i][0].points[0] += 0.001
-        triangles[i][0].points[1] += -0.05
+    # for i in range(len(triangles)):
+    #     triangles[i][0].points[0] += 0.001
+    #     triangles[i][0].points[1] += -0.05
         
-        triangles[i][1].points[0] += 0.001
-        triangles[i][1].points[1] += 0.05
+    #     triangles[i][1].points[0] += 0.001
+    #     triangles[i][1].points[1] += 0.05
     
     # input = []
     # for p1, p2, p3 in triangles:
@@ -827,7 +842,10 @@ if __name__ == "__main__":
             sq[2] = sq[3]
             sq[3] = temp
 
-        triangle_to_voxel(square)
+        square_to_voxel(square)
+        
+    if (n, k) == (3, 2):
+        visualize_edges_3d(square)
 
     # file2 = open(r"square.txt", "w+") 
     # for sq in square:
