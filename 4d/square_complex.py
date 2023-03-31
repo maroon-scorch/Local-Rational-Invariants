@@ -342,10 +342,13 @@ def find_intersection(complex, tri, n):
             value = np.linalg.matrix_rank(whole_matrix)
             
             # Finding the intersection, this should be unique.
-            # print("A: ", whole_matrix)
-            # print("b: ", output)
-            # print(tri)
+            print("A: ", whole_matrix)
+            print("b: ", output)
+            print(linear_list[j][0])
+            print(linear_list[j][1])
+            print(tri)
             # print(complex)
+            
             intersection = np.linalg.solve(whole_matrix, output)
             intersection = to_point(intersection)
 
@@ -793,13 +796,35 @@ def square_to_string(sq):
     for p in sq:
         for item in p.points:
             output += str(item) + " "
-    return output 
+    return output
+
+def remove_degenerate_triangles(triangles, n, k):
+    # Removes all triangle with "volume" close to ~0, triangle has to be at least 1 dimensional.
+    result = []
+    for tri in triangles:
+        trig_vectors = []
+        for i in range(1, len(tri)):
+            current_vec = (tri[i].vec - tri[0].vec).tolist()
+            trig_vectors.append(current_vec)
+        kernel = nullspace(np.array(trig_vectors))
+        
+        if len(kernel) + k - 1 == n:
+            result.append(tri)
+               
+    return result
 
 if __name__ == "__main__":
     input_file = sys.argv[1]
     triangles, n, k = read_input(input_file)
+    
+    # Pruning degenerate triangles:
+    if k > 1:
+        triangles = remove_degenerate_triangles(triangles, n, k)
+    
     print(n, k)
     print("Number of Triangles: ", len(triangles))
+    
+
     
     if (n, k) == (2, 2):
         visualize_edges(triangles)

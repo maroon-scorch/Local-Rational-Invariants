@@ -377,8 +377,8 @@ if __name__ == "__main__":
 
     # Torus
 
-    # mesh_3d = generate_mesh()
-    mesh_3d = generate_torus()
+    mesh_3d = generate_mesh()
+    # mesh_3d = generate_torus()
     # mesh_3d = potato_chip()
     m_triangles = list(map(lambda trig: Trig(trig[0], trig[1], trig[2]), mesh_3d))
     mesh_triangles = []
@@ -399,7 +399,7 @@ if __name__ == "__main__":
     file2.close()
     
     print("Number of Triangles: ", len(mesh_triangles))
-    # triangle_to_voxel(mesh_triangles)
+    triangle_to_voxel(mesh_triangles)
     
     sq_list = solve(mesh_triangles)
     
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     #     file2.write(sq.to_string() + "\n")
     
     # debug_plot(mesh_triangles, pts, center)
-    # square_to_voxel(sq_list)
+    square_to_voxel(sq_list)
 
     
     # y_int = int_between(np.min(y), np.max(y))

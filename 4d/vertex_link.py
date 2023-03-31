@@ -1,5 +1,26 @@
 from pointn import *
 
+def vec_to_index(vec):
+    # vec is a list of integers
+    item = vec.copy()
+    
+    if 1 in item:
+        index = item.index(1)
+        item[index] = 0
+        if all(v == 0 for v in item):
+            return 2*index + 1
+        else:
+            return -1
+    elif -1 in item:
+        index = item.index(-1)
+        item[index] = 0
+        if all(v == 0 for v in item):
+            return 2*index + 2
+        else:
+            return -1
+    else:
+        return -1
+
 def vertex_set(squares):
     vertex = set()
     for sq in squares:
@@ -34,6 +55,21 @@ def vertex_link(v, neighbors, n):
     print("Link: ", link)
     print(len(link))
     return link
+
+def get_all_vertices(center, diff, n):
+    idx = np.nonzero(diff)[0].tolist()
+    # This is exactly the construction of a Boolean Lattice
+    # We inductively make copy of the previous lattice shifted by a vector
+    sq = [center]
+    for i in idx:
+        current_vec = [0 for i in range(n)]
+        current_vec[i] = diff[i]
+        new_pts = []
+        for s in sq:
+            new_pts.append(translate(s, current_vec))
+        sq = sq + new_pts
+    
+    return sq
 
 if __name__ == "__main__":
     
