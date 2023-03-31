@@ -168,9 +168,20 @@ def find_center(p):
     # case the code returns the center of that k-simplex.
 
     point_list = p.points
-
-    max_list = list(map(lambda p: math.ceil(p), point_list))
-    min_list = list(map(lambda p: math.floor(p), point_list))
+    new_list = []
+    # Cleaning floating point errors
+    for elt in point_list:
+        # 0.0000000001
+        # if it's not broken, don't fix it???
+        if abs(elt - round(elt)) < -1:
+            new_list.append(int(round(elt)))
+        else:
+            new_list.append(elt)
+            
+    print(new_list)
+            
+    max_list = list(map(lambda p: math.ceil(p), new_list))
+    min_list = list(map(lambda p: math.floor(p), new_list))
 
     max_pt = PointN(max_list)
     min_pt = PointN(min_list)
@@ -342,11 +353,11 @@ def find_intersection(complex, tri, n):
             value = np.linalg.matrix_rank(whole_matrix)
             
             # Finding the intersection, this should be unique.
-            print("A: ", whole_matrix)
-            print("b: ", output)
-            print(linear_list[j][0])
-            print(linear_list[j][1])
-            print(tri)
+            # print("A: ", whole_matrix)
+            # print("b: ", output)
+            # print(linear_list[j][0])
+            # print(linear_list[j][1])
+            # print(tri)
             # print(complex)
             
             intersection = np.linalg.solve(whole_matrix, output)
@@ -399,7 +410,11 @@ def intersection_to_squares(center, intersections, n, k):
     # For every point in the intersection, we construct the appropriate
     # cube between the center and that point.
     for p in intersections:
+        # print(intersections)
+        # Clean intersections
         c = find_center(p)
+        print(c)
+        print(center)
         diff = c.vec - center.vec
 
         # print("p: ", p)
@@ -813,6 +828,27 @@ def remove_degenerate_triangles(triangles, n, k):
                
     return result
 
+def is_point_on_lattice(pt):
+    # Technically not lattice
+    boolean_list = []
+    for p in pt.points:
+        boolean_list.append(abs(p - round(p)) < 0.0000001)
+    
+    print(boolean_list.count(True))
+    # print(boolean_list)
+    
+    return boolean_list.count(True) > 0
+
+def general_position(triangles):
+    # If triangle has integer points, attempts to perturb it
+    epsilon = 0.1
+    for tri in triangles:
+        for i in range(0, len(tri)):
+            current_point = tri[i]
+            if is_point_on_lattice(current_point):
+                print("INTEGER POINT: ", current_point)
+            
+
 if __name__ == "__main__":
     input_file = sys.argv[1]
     triangles, n, k = read_input(input_file)
@@ -820,6 +856,8 @@ if __name__ == "__main__":
     # Pruning degenerate triangles:
     if k > 1:
         triangles = remove_degenerate_triangles(triangles, n, k)
+    
+    # triangles = general_position(triangles)
     
     print(n, k)
     print("Number of Triangles: ", len(triangles))

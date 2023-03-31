@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # theta = math.pi/4
     # t_x = lambda t: f_x(t)*math.cos(theta) - f_y(t)*math.sin(theta)
     # t_y = lambda t: f_x(t)*math.sin(theta) + f_y(t)*math.cos(theta)
-    points = custom_cuve(f_x, f_y, 0, 4*math.pi, 100, 30)
+    points = custom_cuve(f_x, f_y, 0, 2*math.pi, 20, 30)
     
     for i, p in enumerate(points):
         if i != len(points) - 1:

@@ -47,8 +47,9 @@ def custom_cuve(curve_x, curve_y, curve_z, start, stop, num_points, scale):
 f_x = lambda t: math.sin(t) + 2*math.sin(2*t)
 f_y = lambda t: math.cos(t) - 2*math.cos(2*t)
 f_z = lambda t: -math.sin(3*t)
-points = custom_cuve(f_x, f_y, f_z, 0, 2*math.pi , 30, 5)
+points = custom_cuve(f_x, f_y, f_z, 0, 2*math.pi , 100, 5)
 
+f = open("temp.txt", "w+")
 for i in range(len(points)):
     if i != len(points) - 1:
         current_v = points[i]
@@ -57,5 +58,5 @@ for i in range(len(points)):
         current_v = points[i]
         next_v = points[0]
         
-    string = to_string(current_v) + " " + to_string(next_v)
-    print(string)
+    string = to_string(current_v) + " " + to_string(next_v) + "\n"
+    f.write(string)
