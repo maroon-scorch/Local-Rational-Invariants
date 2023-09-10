@@ -20,13 +20,13 @@ Formally encoding the idea in the introduction, the main algorithm is done using
 We will illustrate this with an example of the Euler characteristic of closed surfaces in $\mathbb{R}^3$:
 
 1. Suppose we are given a triangulated torus $T$:<br />
-![alt text](figures/Figure_1.png)
+![alt text](https://github.com/maroon-scorch/Local-Rational-Invariants/blob/main/figures/Figure_1.png)
 
 2. We first perform a rectangulation of the torus as follows:<br />
-![alt text](figures/sq_torus.png)
+![alt text](https://github.com/maroon-scorch/Local-Rational-Invariants/blob/main/figures/sq_torus.png)
 
 3. We keep a count of every vertex in the rectangulated torus, classified by its link structure. For each type $i$, let's call the count $n_i$. Here's an example of a vertex type:<br />
-![alt text](figures/vertex_5.png)
+![alt text](https://github.com/maroon-scorch/Local-Rational-Invariants/blob/main/figures/vertex_5.png)
 
 4. Each vertex of the same type is assigned with some undetermined rational number $r_i$, we make a linear equation:
 $$\sum_i n_i r_i = \chi(T) = 0$$
