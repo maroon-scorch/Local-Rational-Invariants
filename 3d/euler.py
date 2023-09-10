@@ -327,7 +327,7 @@ def squares_to_polynomials(squares, num):
     return polynomial, variables
 
 if __name__ == "__main__":
-    iter = 50
+    iter = 1
     all_variables = set()
     file = open("polynomial.txt", "w+")
     
